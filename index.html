@@ -3,122 +3,89 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EarnCrypto Dashboard</title>
+  <title>EarnCrypto Referral</title>
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #000;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-
-    header {
       background-color: #111;
-      padding: 1rem;
+      color: #fff;
       text-align: center;
-      font-size: 1.4rem;
-      font-weight: bold;
-      border-bottom: 1px solid #333;
+      padding: 30px;
     }
-
-    .content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 1.5rem;
-      text-align: center;
-    }
-
-    .points-box {
-      background-color: #222;
-      border: 1px solid #444;
-      padding: 1.5rem;
+    .box {
+      background: #1e1e1e;
+      padding: 20px;
       border-radius: 10px;
-      font-size: 1.2rem;
-      margin-bottom: 1.5rem;
-      width: 100%;
-      max-width: 300px;
+      display: inline-block;
     }
-
-    nav {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 0.7rem 0;
-      background-color: #111;
-      border-top: 1px solid #333;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      z-index: 999;
+    input {
+      width: 80%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      margin-bottom: 10px;
     }
-
-    nav a {
-      color: #fff;
-      text-decoration: none;
-      font-size: 0.8rem;
-      text-align: center;
-      flex: 1;
+    button {
+      background: #00ff9f;
+      color: black;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
-
-    nav a:hover {
-      color: #00ff80;
+    .success {
+      color: #00ff9f;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <header>EarnCrypto Dashboard</header>
-  <div class="content">
-    <div class="points-box">
-      User: <span id="username">Loading...</span><br />
-      Telegram ID: <span id="telegramId">Loading...</span><br />
-      Total Points: <span id="points">0</span>
-    </div>
-    <p>Welcome to EarnCrypto, earn points and get rewards!</p>
+  <div class="box">
+    <h2>Your Referral Link</h2>
+    <input type="text" id="referralLink" readonly>
+    <br />
+    <button onclick="copyLink()">Copy Link</button>
+    <p class="success" id="copiedMsg"></p>
   </div>
 
-  <nav>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="watchads.html">Ads</a>
-    <a href="spin.html">Spin</a>
-    <a href="task.html">Tasks</a>
-    <a href="referral.html">Refer</a>
-    <a href="withdraw.html">Withdraw</a>
-  </nav>
-
-  <!-- Telegram WebApp Script -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
-    const tg = window.Telegram.WebApp;
-    const user = tg.initDataUnsafe.user;
+    window.Telegram.WebApp.ready();
 
-    if (user) {
-      const telegramId = user.id;
-      const username = user.username || "NoUsername";
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
+    const userId = telegramUser.id;
+    const username = telegramUser.username || 'unknown';
 
-      document.getElementById("username").textContent = username;
-      document.getElementById("telegramId").textContent = telegramId;
+    const referralUrl = `https://karangangani.github.io/Watch2earnbot/refferal?ref=${userId}`;
+    document.getElementById("referralLink").value = referralUrl;
 
-      // Register or get user points from backend
-      fetch("https://reminiscent-desert-jeep.glitch.me/update", {
+    // Send referral data to Glitch backend
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get('ref');
+
+    if (ref && ref !== userId.toString()) {
+      fetch("https://small-alpine-sailfish.glitch.me/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ telegramId, username, points: 0 })
+        body: JSON.stringify({
+          userId: userId,
+          username: username,
+          referredBy: ref
+        }),
       })
       .then(res => res.json())
-      .then(data => {
-        document.getElementById("points").textContent = data.data.points;
-      })
-      .catch(err => {
-        console.error("Error fetching points:", err);
-      });
-    } else {
-      alert("Please open this page via Telegram Mini App.");
+      .then(data => console.log("Registered:", data))
+      .catch(err => console.error("Error:", err));
+    }
+
+    function copyLink() {
+      const copyText = document.getElementById("referralLink");
+      copyText.select();
+      copyText.setSelectionRange(0, 99999); 
+      document.execCommand("copy");
+
+      document.getElementById("copiedMsg").innerText = "Link copied!";
     }
   </script>
 </body>
