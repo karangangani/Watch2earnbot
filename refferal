@@ -1,0 +1,53 @@
+<!-- Referral Section -->
+<section id="referral" style="padding: 20px;">
+  <h2>Your Referral Link</h2>
+  <p>Share this link to earn 50 points for each new user!</p>
+  <input type="text" id="referralLink" readonly style="width: 100%; padding: 10px; margin-bottom: 10px;">
+  <button onclick="copyReferral()">Copy Referral Link</button>
+  <p id="copyMessage" style="color: green;"></p>
+</section>
+
+<script>
+  // Wait for Telegram Mini App to load
+  window.Telegram.WebApp.ready();
+
+  const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
+  const userId = telegramUser.id;
+  const username = telegramUser.username || 'unknown';
+
+  // Set user's referral link
+  const referralUrl = `https://your-github-username.github.io/your-repo-name/?ref=${userId}`;
+  document.getElementById("referralLink").value = referralUrl;
+
+  function copyReferral() {
+    const input = document.getElementById("referralLink");
+    input.select();
+    input.setSelectionRange(0, 99999); // For mobile
+    document.execCommand("copy");
+    document.getElementById("copyMessage").innerText = "Referral link copied!";
+  }
+
+  // Get referral code from URL (if exists)
+  const urlParams = new URLSearchParams(window.location.search);
+  const ref = urlParams.get('ref');
+
+  // Send referral data to Glitch backend
+  fetch('https://small-alpine-sailfish.glitch.me/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      userId: userId,
+      username: username,
+      referredBy: ref
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Referral registered:', data);
+  })
+  .catch(error => {
+    console.error('Referral error:', error);
+  });
+</script>
