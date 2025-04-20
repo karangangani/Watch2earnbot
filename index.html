@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EarnCrypto App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EarnCrypto Dashboard</title>
   <style>
     body {
       margin: 0;
@@ -39,7 +39,7 @@
       border: 1px solid #444;
       padding: 1.5rem;
       border-radius: 10px;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       margin-bottom: 1.5rem;
       width: 100%;
       max-width: 300px;
@@ -69,29 +69,17 @@
     nav a:hover {
       color: #00ff80;
     }
-
-    @media (min-width: 600px) {
-      header {
-        font-size: 1.8rem;
-      }
-
-      .points-box {
-        font-size: 2rem;
-      }
-
-      nav a {
-        font-size: 1rem;
-      }
-    }
   </style>
 </head>
 <body>
-  <header>EarnCrypto</header>
+  <header>EarnCrypto Dashboard</header>
   <div class="content">
     <div class="points-box">
+      User: <span id="username">Loading...</span><br />
+      Telegram ID: <span id="telegramId">Loading...</span><br />
       Total Points: <span id="points">0</span>
     </div>
-    <p>Welcome! Use the menu below to explore.</p>
+    <p>Welcome to EarnCrypto, earn points and get rewards!</p>
   </div>
 
   <nav>
@@ -103,10 +91,35 @@
     <a href="withdraw.html">Withdraw</a>
   </nav>
 
+  <!-- Telegram WebApp Script -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
-    // Simulate points with localStorage
-    let points = localStorage.getItem('points') || 0;
-    document.getElementById('points').textContent = points;
+    const tg = window.Telegram.WebApp;
+    const user = tg.initDataUnsafe.user;
+
+    if (user) {
+      const telegramId = user.id;
+      const username = user.username || "NoUsername";
+
+      document.getElementById("username").textContent = username;
+      document.getElementById("telegramId").textContent = telegramId;
+
+      // Register or get user points from backend
+      fetch("https://reminiscent-desert-jeep.glitch.me/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ telegramId, username, points: 0 })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("points").textContent = data.data.points;
+      })
+      .catch(err => {
+        console.error("Error fetching points:", err);
+      });
+    } else {
+      alert("Please open this page via Telegram Mini App.");
+    }
   </script>
 </body>
-  </html>
+</html>
