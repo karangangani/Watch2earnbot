@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Watch Ads - EarnCrypto</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      padding: 1rem;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .video-container {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    video {
+      width: 100%;
+      max-width: 400px;
+      border: 2px solid #444;
+      border-radius: 10px;
+    }
+
+    .btn {
+      background-color: #0f0;
+      color: #000;
+      padding: 1rem;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .btn:disabled {
+      background-color: #555;
+      color: #aaa;
+    }
+
+    .info {
+      text-align: center;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Watch Ads</h1>
+  <div class="video-container">
+    <video id="adVideo" controls>
+      <source src="your-ad-video.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <div style="text-align:center;">
+    <button class="btn" id="claimBtn" disabled>Watch full ad to claim 10 points</button>
+  </div>
+
+  <div class="info">
+    <p>Ads watched today: <span id="watchedCount">0</span>/15</p>
+    <p>Total Points: <span id="totalPoints">0</span></p>
+  </div>
+
+  <script>
+    const video = document.getElementById("adVideo");
+    const claimBtn = document.getElementById("claimBtn");
+    const watchedCount = document.getElementById("watchedCount");
+    const totalPoints = document.getElementById("totalPoints");
+
+    let adsWatched = parseInt(localStorage.getItem("adsWatched") || "0");
+    let points = parseInt(localStorage.getItem("points") || "0");
+
+    watchedCount.textContent = adsWatched;
+    totalPoints.textContent = points;
+
+    video.onended = () => {
+      if (adsWatched < 15) {
+        claimBtn.disabled = false;
+      }
+    };
+
+    claimBtn.onclick = () => {
+      if (adsWatched < 15) {
+        adsWatched++;
+        points += 10;
+        localStorage.setItem("adsWatched", adsWatched);
+        localStorage.setItem("points", points);
+        watchedCount.textContent = adsWatched;
+        totalPoints.textContent = points;
+        claimBtn.disabled = true;
+        alert("You earned 10 points!");
+      } else {
+        alert("You reached today's ad limit!");
+      }
+    };
+
+    // Reset daily ads watched every 24 hours
+    const lastVisit = localStorage.getItem("lastVisit") || Date.now();
+    if (Date.now() - lastVisit > 86400000) {
+      localStorage.setItem("adsWatched", 0);
+    }
+    localStorage.setItem("lastVisit", Date.now());
+  </script>
+</body>
+    </html>
