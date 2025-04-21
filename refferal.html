@@ -1,56 +1,64 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Referral Page</title>
-  <script src="https://unpkg.com/@supabase/supabase-js"></script>
-</head>
-<body>
-  <h2>Processing your referral...</h2>
-
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const ref = urlParams.get('ref');
-
-    const supabase = supabase.createClient(
-      'https://aoewgfpojwisjwnspvij.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvZXdnZnBvandpc2p3bnNwdmlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2ODU3NDQsImV4cCI6MjA1NzI2MTc0NH0.Pii4cQPm4Tb4qOlYQROO6lLVm25-VuWQoDASnxkffzw'
-    );
-
-    window.Telegram.WebApp.ready();
-    const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
-    const telegramId = telegramUser.id;
-    const username = telegramUser.username;
-
-    async function processReferral() {
-      // Add user if not exists
-      let { data: existing } = await supabase
-        .from('users')
-        .select('*')
-        .eq('telegram_id', telegramId)
-        .single();
-
-      if (!existing) {
-        await supabase.from('users').insert({
-          telegram_id: telegramId,
-          username: username,
-          referred_by: ref ? parseInt(ref) : null
-        });
-        console.log('New user added');
-
-        // Add 10 points to referrer
-        if (ref) {
-          await supabase.rpc('add_points', {
-            ref_id: parseInt(ref),
-            add_points: 10
-          });
-          console.log('10 points added to referrer');
-        }
-      } else {
-        console.log('User already exists');
+  <head>
+    <meta charset="UTF-8" />
+    <title>Referral System</title>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding-top: 100px;
+        background-color: #f2f2f2;
       }
-    }
+      h3 {
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Processing your referral...</h3>
 
-    processReferral();
-  </script>
-</body>
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const ref = urlParams.get('ref');
+
+      const supabase = supabase.createClient(
+        'https://aoewgfpojwisjwnspvij.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvZXdnZnBwandpc2p3bnNwdmlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2ODU3NDQsImV4cCI6MjA1NzI2MTc0NH0.Pii4cQPm4Tb4qOlYQROO6lLVm25-VuWQoDASnxkffzw'
+      );
+
+      window.Telegram.WebApp.ready();
+      const user = window.Telegram.WebApp.initDataUnsafe.user;
+
+      async function sendReferral() {
+        const { id, username } = user;
+
+        let { data: existing } = await supabase
+          .from('users')
+          .select('*')
+          .eq('telegram_id', id)
+          .single();
+
+        if (!existing) {
+          await supabase.from('users').insert({
+            telegram_id: id,
+            username: username,
+            referred_by: ref ? parseInt(ref) : null
+          });
+
+          if (ref) {
+            await supabase.rpc('add_points', {
+              ref_id: parseInt(ref),
+              add_points: 10
+            });
+          }
+        }
+
+        document.querySelector('h3').innerText = "Referral recorded! You can now return to the bot.";
+      }
+
+      sendReferral();
+    </script>
+  </body>
 </html>
