@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Withdraw</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+    }
+    h2 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .help {
+      text-align: center;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Withdraw Points</h2>
+    <input type="text" id="telegramId" placeholder="Enter Your Telegram Username (e.g. @yourname)" />
+    <input type="number" id="withdrawAmount" placeholder="Enter Points to Withdraw" />
+    <button onclick="submitWithdraw()">Submit Withdraw Request</button>
+    <div class="help">
+      <p>Need help? Contact: <a href="mailto:karangangani05@gmail.com">karangangani05@gmail.com</a></p>
+    </div>
+  </div>  <script>
+    function submitWithdraw() {
+      const telegramId = document.getElementById('telegramId').value;
+      const withdrawAmount = parseInt(document.getElementById('withdrawAmount').value);
+      const currentPoints = parseInt(localStorage.getItem('points')) || 0;
+
+      if (!telegramId.startsWith('@')) {
+        alert('Please enter a valid Telegram username starting with @');
+        return;
+      }
+
+      if (withdrawAmount <= 0 || withdrawAmount > currentPoints) {
+        alert('Invalid withdraw amount.');
+        return;
+      }
+
+      // Deduct points
+      const newPoints = currentPoints - withdrawAmount;
+      localStorage.setItem('points', newPoints);
+
+      // Notify parent to update dashboard
+      window.parent.postMessage({ type: "updatePoints", points: newPoints }, "*");
+
+      // Simulate request to your Telegram ID (this is a placeholder, real Telegram bot would handle this)
+      alert(`Withdraw request sent!\nUsername: ${telegramId}\nAmount: ${withdrawAmount} points\nWe'll contact you shortly.`);
+    }
+  </script></body>
+  </html>
