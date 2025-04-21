@@ -166,6 +166,14 @@
     <button class="back-btn" onclick="goTo('dashboard')">Back</button>
   </div>
 
+<div id="info" class="section">
+  <iframe src="https://karangangani.github.io/Watch2earnbot/info.html"></iframe>
+  <iframe src="https://karangangani.github.io/Watch2earnbot/contact.html"></iframe>
+  <iframe src="https://karangangani.github.io/Watch2earnbot/privacy.html"></iframe>
+  <iframe src="https://karangangani.github.io/Watch2earnbot/terms.html"></iframe>
+  <button class="back-btn" onclick="goTo('dashboard')">Back</button>
+</div>
+
   <!-- Bottom Navigation -->
   <nav>
     <a href="#" onclick="goTo('dashboard')"><i class="fa fa-home"></i>Dashboard</a>
@@ -173,6 +181,7 @@
     <a href="#" onclick="goTo('tasks')"><i class="fa fa-tasks"></i>Tasks</a>
     <a href="#" onclick="goTo('referral')"><i class="fa fa-user-friends"></i>Refer</a>
     <a href="#" onclick="goTo('withdraw')"><i class="fa fa-wallet"></i>Withdraw</a>
+    <a href="#" onclick="goTo('info')"><i class="fa fa-info-circle"></i>Info</a>
   </nav>
 
   <!-- Telegram WebApp + Script -->
@@ -216,7 +225,7 @@
     }
 
     function goTo(sectionId) {
-      const sections = ["dashboard", "ads", "tasks", "referral", "withdraw"];
+      const sections = ["dashboard", "ads", "tasks", "referral", "withdraw", "info"];
       sections.forEach(id => document.getElementById(id).style.display = "none");
       document.getElementById(sectionId).style.display = "block";
     }
@@ -233,4 +242,4 @@
     goTo('dashboard');
   </script>
 </body>
-      </html>
+</html>
