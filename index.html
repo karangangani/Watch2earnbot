@@ -1,11 +1,10 @@
-index.html
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>EarnCrypto Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     body {
       margin: 0;
@@ -16,6 +15,7 @@ index.html
       flex-direction: column;
       height: 100vh;
     }
+
     header {
       background-color: #111;
       padding: 1rem;
@@ -24,6 +24,7 @@ index.html
       font-weight: bold;
       border-bottom: 1px solid #333;
     }
+
     .content {
       flex: 1;
       display: flex;
@@ -33,6 +34,7 @@ index.html
       padding: 1.5rem;
       text-align: center;
     }
+
     .points-box {
       background-color: #222;
       border: 1px solid #444;
@@ -43,11 +45,12 @@ index.html
       width: 100%;
       max-width: 300px;
     }
+
     nav {
       display: flex;
       justify-content: space-around;
       align-items: center;
-      padding: 0.7rem 0;
+      padding: 0.5rem 0;
       background-color: #111;
       border-top: 1px solid #333;
       position: fixed;
@@ -55,98 +58,142 @@ index.html
       width: 100%;
       z-index: 999;
     }
+
     nav a {
       color: #fff;
       text-decoration: none;
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       text-align: center;
       flex: 1;
     }
+
+    nav a .fa {
+      font-size: 1.2rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+
     nav a:hover {
       color: #00ff80;
+    }
+
+    .section {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .back-btn {
+      margin-top: 1rem;
+      background: #444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background-color: #00ff80;
+      color: black;
     }
   </style>
 </head>
 <body>
-  <header>EarnCrypto Dashboard</header>
-  <div class="content">
+  <header>EarnCrypto</header>
+
+  <div class="content" id="dashboard">
     <div class="points-box">
-      User: <span id="username">Loading...</span><br>
-      Telegram ID: <span id="telegramId">Loading...</span><br>
-      Total Points: <span id="points">0</span>
+      User: <span id="username">Loading...</span><br/>
+      Telegram ID: <span id="telegramId">Loading...</span><br/>
+      Total Points: <span id="points">0</span> 🪙
     </div>
     <p>Welcome to EarnCrypto, earn points and get rewards!</p>
   </div>
 
+  <!-- Section Containers -->
+  <div id="ads" class="section">
+    <h2>Watch Ads</h2>
+    <iframe src="https://karangangani.github.io/Watch2earnbot/ads.html" width="100%" height="400px"></iframe>
+    <button class="back-btn" onclick="goTo('dashboard')">Back</button>
+  </div>
+
+  <div id="spin" class="section">
+    <h2>Spin to Win</h2>
+    <iframe src="https://karangangani.github.io/Watch2earnbot/wheel.html" width="100%" height="400px"></iframe>
+    <button class="back-btn" onclick="goTo('dashboard')">Back</button>
+  </div>
+
+  <div id="tasks" class="section">
+    <h2>Tasks</h2>
+    <iframe src="https://karangangani.github.io/Watch2earnbot/task.html" width="100%" height="400px"></iframe>
+    <button class="back-btn" onclick="goTo('dashboard')">Back</button>
+  </div>
+
+  <div id="referral" class="section">
+    <h2>Referral</h2>
+    <iframe src="https://karangangani.github.io/Watch2earnbot/refferal.html" width="100%" height="400px"></iframe>
+    <button class="back-btn" onclick="goTo('dashboard')">Back</button>
+  </div>
+
+  <div id="withdraw" class="section">
+    <h2>Withdraw</h2>
+    <iframe src="https://karangangani.github.io/Watch2earnbot/withdraw.html" width="100%" height="400px"></iframe>
+    <button class="back-btn" onclick="goTo('dashboard')">Back</button>
+  </div>
+
+  <!-- Navigation Bar with Icons -->
   <nav>
-    <a href="index.html">Dashboard</a>
-    <a href="ads.html">Ads</a>
-    <a href="https://karangangani.github.io/Watch2earnbot/wheel.html">Spin</a>
-    <a href="tasks.html">Tasks</a>
-    <a href="https://karangangani.github.io/Watch2earnbot/refferal.html">Refer</a>
-    <a href="withdraw.html">Withdraw</a>
+    <a href="#" onclick="goTo('dashboard')"><i class="fa fa-home"></i>Dashboard</a>
+    <a href="#" onclick="goTo('ads')"><i class="fa fa-video"></i>Ads</a>
+    <a href="#" onclick="goTo('spin')"><i class="fa fa-sync-alt"></i>Spin</a>
+    <a href="#" onclick="goTo('tasks')"><i class="fa fa-tasks"></i>Tasks</a>
+    <a href="#" onclick="goTo('referral')"><i class="fa fa-user-friends"></i>Refer</a>
+    <a href="#" onclick="goTo('withdraw')"><i class="fa fa-wallet"></i>Withdraw</a>
   </nav>
 
+  <!-- Telegram WebApp Script -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
     const tg = window.Telegram.WebApp;
     const user = tg.initDataUnsafe.user;
+
+    const usernameSpan = document.getElementById("username");
+    const telegramIdSpan = document.getElementById("telegramId");
+    const pointsSpan = document.getElementById("points");
+
+    const getPoints = () => parseInt(localStorage.getItem("points") || "0");
+
+    const setPoints = (newPoints) => {
+      localStorage.setItem("points", newPoints);
+      pointsSpan.textContent = newPoints + " 🪙";
+    }
+
     if (user) {
-      document.getElementById("username").textContent = user.username || "Guest";
-      document.getElementById("telegramId").textContent = user.id;
+      const telegramId = user.id;
+      const username = user.username || "NoUsername";
+      usernameSpan.textContent = username;
+      telegramIdSpan.textContent = telegramId;
+      setPoints(getPoints());
+    } else {
+      alert("Please open this page via Telegram Mini App.");
     }
-    const storedPoints = parseInt(localStorage.getItem("points")) || 0;
-    document.getElementById("points").textContent = storedPoints;
+
+    function goTo(sectionId) {
+      const sections = ["dashboard", "ads", "spin", "tasks", "referral", "withdraw"];
+      sections.forEach(id => document.getElementById(id).style.display = "none");
+      document.getElementById(sectionId).style.display = "flex";
+    }
+
+    goTo('dashboard');
+
+    window.addEventListener("message", (event) => {
+      if (event.data.type === "addPoints") {
+        const current = getPoints();
+        setPoints(current + event.data.points);
+      }
+    });
   </script>
 </body>
-</html>
-
-wheel.html (Spin Page Example)
-
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Spin & Earn</title>
-</head>
-<body>
-  <h2>Spin Result</h2>
-  <p>You earned <strong>5</strong> points!</p>
-  <button onclick="addPoints(5)">Claim</button>
-
-  <script>
-    function addPoints(amount) {
-      let currentPoints = parseInt(localStorage.getItem("points")) || 0;
-      currentPoints += amount;
-      localStorage.setItem("points", currentPoints);
-      alert("Points added! Go back to dashboard.");
-    }
-  </script>
-</body>
-</html>
-
-refferal.html (Referral Page Example)
-
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Refer & Earn</title>
-</head>
-<body>
-  <h2>Referral Bonus</h2>
-  <p>You referred a friend!</p>
-  <button onclick="addReferralPoints()">Get 10 Points</button>
-
-  <script>
-    function addReferralPoints() {
-      let currentPoints = parseInt(localStorage.getItem("points")) || 0;
-      currentPoints += 10;
-      localStorage.setItem("points", currentPoints);
-      alert("Referral points added! Check dashboard.");
-    }
-  </script>
-</body>
-</html>
-
-Let me know if you want the same logic added to ads, tasks, or withdraw too!
-
-  
+  </html>
