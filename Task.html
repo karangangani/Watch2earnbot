@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tasks - EarnCrypto</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #3c8dbc;
+      color: white;
+      text-align: center;
+      padding: 1em;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .task {
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      background-color: #f9f9f9;
+    }
+
+    .task h3 {
+      margin: 0 0 10px;
+    }
+
+    .task button {
+      background: #28a745;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .task button:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Task Center</h1>
+  </header>
+
+  <div class="container">
+    <div class="task">
+      <h3>Join Our Official Telegram Channel</h3>
+      <p><a href="https://t.me/earncryptofree24" target="_blank">https://t.me/earncryptofree24</a></p>
+      <button onclick="claimTask('telegramJoin')">Claim 10 Points</button>
+    </div>
+
+    <!-- More tasks can be added here -->
+  </div>
+
+  <script>
+    function claimTask(taskName) {
+      if (localStorage.getItem(taskName)) {
+        alert("You've already claimed this reward!");
+        return;
+      }
+
+      let points = parseInt(localStorage.getItem("points") || 0);
+      points += 10;
+      localStorage.setItem("points", points);
+      localStorage.setItem(taskName, "done");
+
+      alert("10 points added! Go check your dashboard.");
+      window.parent.postMessage({ type: "addPoints", points: 10 }, "*");
+    }
+  </script>
+</body>
+</html>
