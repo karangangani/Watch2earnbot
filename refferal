@@ -1,53 +1,56 @@
-<!-- Referral Section -->
-<section id="referral" style="padding: 20px;">
-  <h2>Your Referral Link</h2>
-  <p>Share this link to earn 50 points for each new user!</p>
-  <input type="text" id="referralLink" readonly style="width: 100%; padding: 10px; margin-bottom: 10px;">
-  <button onclick="copyReferral()">Copy Referral Link</button>
-  <p id="copyMessage" style="color: green;"></p>
-</section>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Referral Page</title>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+</head>
+<body>
+  <h2>Processing your referral...</h2>
 
-<script>
-  // Wait for Telegram Mini App to load
-  window.Telegram.WebApp.ready();
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get('ref');
 
-  const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
-  const userId = telegramUser.id;
-  const username = telegramUser.username || 'unknown';
+    const supabase = supabase.createClient(
+      'https://aoewgfpojwisjwnspvij.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvZXdnZnBvandpc2p3bnNwdmlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2ODU3NDQsImV4cCI6MjA1NzI2MTc0NH0.Pii4cQPm4Tb4qOlYQROO6lLVm25-VuWQoDASnxkffzw'
+    );
 
-  // Set user's referral link
-  const referralUrl = `https://your-github-username.github.io/your-repo-name/?ref=${userId}`;
-  document.getElementById("referralLink").value = referralUrl;
+    window.Telegram.WebApp.ready();
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
+    const telegramId = telegramUser.id;
+    const username = telegramUser.username;
 
-  function copyReferral() {
-    const input = document.getElementById("referralLink");
-    input.select();
-    input.setSelectionRange(0, 99999); // For mobile
-    document.execCommand("copy");
-    document.getElementById("copyMessage").innerText = "Referral link copied!";
-  }
+    async function processReferral() {
+      // Add user if not exists
+      let { data: existing } = await supabase
+        .from('users')
+        .select('*')
+        .eq('telegram_id', telegramId)
+        .single();
 
-  // Get referral code from URL (if exists)
-  const urlParams = new URLSearchParams(window.location.search);
-  const ref = urlParams.get('ref');
+      if (!existing) {
+        await supabase.from('users').insert({
+          telegram_id: telegramId,
+          username: username,
+          referred_by: ref ? parseInt(ref) : null
+        });
+        console.log('New user added');
 
-  // Send referral data to Glitch backend
-  fetch('https://small-alpine-sailfish.glitch.me/register', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      userId: userId,
-      username: username,
-      referredBy: ref
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log('Referral registered:', data);
-  })
-  .catch(error => {
-    console.error('Referral error:', error);
-  });
-</script>
+        // Add 10 points to referrer
+        if (ref) {
+          await supabase.rpc('add_points', {
+            ref_id: parseInt(ref),
+            add_points: 10
+          });
+          console.log('10 points added to referrer');
+        }
+      } else {
+        console.log('User already exists');
+      }
+    }
+
+    processReferral();
+  </script>
+</body>
+</html>
