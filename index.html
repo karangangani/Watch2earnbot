@@ -1,10 +1,11 @@
+index.html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EarnCrypto Dashboard</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body {
       margin: 0;
@@ -15,7 +16,6 @@
       flex-direction: column;
       height: 100vh;
     }
-
     header {
       background-color: #111;
       padding: 1rem;
@@ -24,7 +24,6 @@
       font-weight: bold;
       border-bottom: 1px solid #333;
     }
-
     .content {
       flex: 1;
       display: flex;
@@ -34,7 +33,6 @@
       padding: 1.5rem;
       text-align: center;
     }
-
     .points-box {
       background-color: #222;
       border: 1px solid #444;
@@ -45,7 +43,6 @@
       width: 100%;
       max-width: 300px;
     }
-
     nav {
       display: flex;
       justify-content: space-around;
@@ -58,28 +55,15 @@
       width: 100%;
       z-index: 999;
     }
-
-    nav button {
-      background: none;
-      border: none;
+    nav a {
       color: #fff;
-      font-size: 0.75rem;
+      text-decoration: none;
+      font-size: 0.8rem;
       text-align: center;
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0.3rem;
-      cursor: pointer;
     }
-
-    nav button:hover {
+    nav a:hover {
       color: #00ff80;
-    }
-
-    nav i {
-      font-size: 1.2rem;
-      margin-bottom: 3px;
     }
   </style>
 </head>
@@ -87,70 +71,82 @@
   <header>EarnCrypto Dashboard</header>
   <div class="content">
     <div class="points-box">
-      User: <span id="username">Loading...</span><br />
-      Telegram ID: <span id="telegramId">Loading...</span><br />
+      User: <span id="username">Loading...</span><br>
+      Telegram ID: <span id="telegramId">Loading...</span><br>
       Total Points: <span id="points">0</span>
     </div>
     <p>Welcome to EarnCrypto, earn points and get rewards!</p>
   </div>
 
   <nav>
-    <button onclick="goTo('dashboard.html')">
-      <i class="fas fa-home"></i>Dashboard
-    </button>
-    <button onclick="goTo('watchads.html')">
-      <i class="fas fa-play-circle"></i>Ads
-    </button>
-    <button onclick="openExternal('https://karangangani.github.io/Watch2earnbot/wheel.html')">
-      <i class="fas fa-sync-alt"></i>Spin
-    </button>
-    <button onclick="goTo('task.html')">
-      <i class="fas fa-tasks"></i>Tasks
-    </button>
-    <button onclick="openExternal('https://karangangani.github.io/Watch2earnbot/refferal.html')">
-      <i class="fas fa-user-friends"></i>Refer
-    </button>
-    <button onclick="goTo('withdraw.html')">
-      <i class="fas fa-wallet"></i>Withdraw
-    </button>
+    <a href="index.html">Dashboard</a>
+    <a href="ads.html">Ads</a>
+    <a href="https://karangangani.github.io/Watch2earnbot/wheel.html">Spin</a>
+    <a href="tasks.html">Tasks</a>
+    <a href="https://karangangani.github.io/Watch2earnbot/refferal.html">Refer</a>
+    <a href="withdraw.html">Withdraw</a>
   </nav>
 
-  <!-- Telegram WebApp Script -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
     const tg = window.Telegram.WebApp;
     const user = tg.initDataUnsafe.user;
-
     if (user) {
-      const telegramId = user.id;
-      const username = user.username || "NoUsername";
-
-      document.getElementById("username").textContent = username;
-      document.getElementById("telegramId").textContent = telegramId;
-
-      fetch("https://reminiscent-desert-jeep.glitch.me/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ telegramId, username, points: 0 })
-      })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("points").textContent = data.data.points;
-      })
-      .catch(err => {
-        console.error("Error fetching points:", err);
-      });
-    } else {
-      alert("Please open this page via Telegram Mini App.");
+      document.getElementById("username").textContent = user.username || "Guest";
+      document.getElementById("telegramId").textContent = user.id;
     }
+    const storedPoints = parseInt(localStorage.getItem("points")) || 0;
+    document.getElementById("points").textContent = storedPoints;
+  </script>
+</body>
+</html>
 
-    function goTo(page) {
-      window.location.href = page;
-    }
+wheel.html (Spin Page Example)
 
-    function openExternal(url) {
-      tg.openLink(url);
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Spin & Earn</title>
+</head>
+<body>
+  <h2>Spin Result</h2>
+  <p>You earned <strong>5</strong> points!</p>
+  <button onclick="addPoints(5)">Claim</button>
+
+  <script>
+    function addPoints(amount) {
+      let currentPoints = parseInt(localStorage.getItem("points")) || 0;
+      currentPoints += amount;
+      localStorage.setItem("points", currentPoints);
+      alert("Points added! Go back to dashboard.");
     }
   </script>
 </body>
 </html>
+
+refferal.html (Referral Page Example)
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Refer & Earn</title>
+</head>
+<body>
+  <h2>Referral Bonus</h2>
+  <p>You referred a friend!</p>
+  <button onclick="addReferralPoints()">Get 10 Points</button>
+
+  <script>
+    function addReferralPoints() {
+      let currentPoints = parseInt(localStorage.getItem("points")) || 0;
+      currentPoints += 10;
+      localStorage.setItem("points", currentPoints);
+      alert("Referral points added! Check dashboard.");
+    }
+  </script>
+</body>
+</html>
+
+Let me know if you want the same logic added to ads, tasks, or withdraw too!
+
+  
