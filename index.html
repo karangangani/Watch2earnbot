@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>EarnCrypto Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body {
       margin: 0;
@@ -58,16 +59,27 @@
       z-index: 999;
     }
 
-    nav a {
+    nav button {
+      background: none;
+      border: none;
       color: #fff;
-      text-decoration: none;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       text-align: center;
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.3rem;
+      cursor: pointer;
     }
 
-    nav a:hover {
+    nav button:hover {
       color: #00ff80;
+    }
+
+    nav i {
+      font-size: 1.2rem;
+      margin-bottom: 3px;
     }
   </style>
 </head>
@@ -83,12 +95,24 @@
   </div>
 
   <nav>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="watchads.html">Ads</a>
-    <a href="https://karangangani.github.io/Watch2earnbot/wheel.html">Spin</a>
-    <a href="task.html">Tasks</a>
-    <a href="https://karangangani.github.io/Watch2earnbot/refferal.html">Refer</a>
-    <a href="withdraw.html">Withdraw</a>
+    <button onclick="goTo('dashboard.html')">
+      <i class="fas fa-home"></i>Dashboard
+    </button>
+    <button onclick="goTo('watchads.html')">
+      <i class="fas fa-play-circle"></i>Ads
+    </button>
+    <button onclick="openExternal('https://karangangani.github.io/Watch2earnbot/wheel.html')">
+      <i class="fas fa-sync-alt"></i>Spin
+    </button>
+    <button onclick="goTo('task.html')">
+      <i class="fas fa-tasks"></i>Tasks
+    </button>
+    <button onclick="openExternal('https://karangangani.github.io/Watch2earnbot/refferal.html')">
+      <i class="fas fa-user-friends"></i>Refer
+    </button>
+    <button onclick="goTo('withdraw.html')">
+      <i class="fas fa-wallet"></i>Withdraw
+    </button>
   </nav>
 
   <!-- Telegram WebApp Script -->
@@ -104,7 +128,6 @@
       document.getElementById("username").textContent = username;
       document.getElementById("telegramId").textContent = telegramId;
 
-      // Register or get user points from backend
       fetch("https://reminiscent-desert-jeep.glitch.me/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -119,6 +142,14 @@
       });
     } else {
       alert("Please open this page via Telegram Mini App.");
+    }
+
+    function goTo(page) {
+      window.location.href = page;
+    }
+
+    function openExternal(url) {
+      tg.openLink(url);
     }
   </script>
 </body>
