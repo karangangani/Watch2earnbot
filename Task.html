@@ -1,89 +1,316 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tasks - EarnCrypto</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 0;
-    }
-
-    header {
-      background: #3c8dbc;
-      color: white;
-      text-align: center;
-      padding: 1em;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 20px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    .task {
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      background-color: #f9f9f9;
-    }
-
-    .task h3 {
-      margin: 0 0 10px;
-    }
-
-    .task button {
-      background: #28a745;
-      color: white;
-      padding: 10px 16px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .task button:hover {
-      background: #218838;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earn Points - Complete Tasks</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            padding: 15px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .task-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .task-card {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            border: 1px solid #333;
+            transition: transform 0.2s;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-3px);
+            border-color: #00ff80;
+        }
+        
+        .task-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #333;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .task-details {
+            flex-grow: 1;
+        }
+        
+        .task-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #00ff80;
+        }
+        
+        .task-description {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+        
+        .task-reward {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .task-reward .points {
+            color: #00ff80;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .task-button {
+            background-color: #00ff80;
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .task-button.completed {
+            background-color: #333;
+            color: #00ff80;
+        }
+        
+        .category-title {
+            margin: 20px 0 10px;
+            color: #00ff80;
+            font-size: 18px;
+        }
+        
+        .points-balance {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        
+        .points-balance span {
+            color: #00ff80;
+            font-weight: bold;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            color: #00ff80;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>Task Center</h1>
-  </header>
-
-  <div class="container">
-    <div class="task">
-      <h3>Join Our Official Telegram Channel</h3>
-      <p><a href="https://t.me/earncryptofree24" target="_blank">https://t.me/earncryptofree24</a></p>
-      <button onclick="claimTask('telegramJoin')">Claim 10 Points</button>
+    <div class="header">
+        <h1>Complete Tasks</h1>
+        <p>Earn points by completing offers</p>
+    </div>
+    
+    <div class="points-balance">
+        Your Points: <span id="user-points">0</span>
+    </div>
+    
+    <div class="task-container">
+        <h3 class="category-title">Mobile Apps</h3>
+        
+        <div class="task-card" data-task-id="install_game_1">
+            <div class="task-icon">
+                <i class="fas fa-gamepad"></i>
+            </div>
+            <div class="task-details">
+                <div class="task-title">Install "Coin Master"</div>
+                <div class="task-description">Install and open the game for 30 seconds</div>
+                <div class="task-reward">
+                    <span class="points">+50 points</span>
+                    <span class="payout">Earns us $1.20</span>
+                </div>
+            </div>
+            <button class="task-button">Start</button>
+        </div>
+        
+        <div class="task-card" data-task-id="install_app_2">
+            <div class="task-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div class="task-details">
+                <div class="task-title">Install "Temu" Shopping App</div>
+                <div class="task-description">Install and browse for 1 minute</div>
+                <div class="task-reward">
+                    <span class="points">+80 points</span>
+                    <span class="payout">Earns us $2.50</span>
+                </div>
+            </div>
+            <button class="task-button">Start</button>
+        </div>
+        
+        <h3 class="category-title">Surveys</h3>
+        
+        <div class="task-card" data-task-id="survey_1">
+            <div class="task-icon">
+                <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div class="task-details">
+                <div class="task-title">Complete Short Survey</div>
+                <div class="task-description">5-7 questions about shopping habits</div>
+                <div class="task-reward">
+                    <span class="points">+30 points</span>
+                    <span class="payout">Earns us $0.75</span>
+                </div>
+            </div>
+            <button class="task-button">Start</button>
+        </div>
+        
+        <h3 class="category-title">Crypto Tasks</h3>
+        
+        <div class="task-card" data-task-id="crypto_signup_1">
+            <div class="task-icon">
+                <i class="fab fa-bitcoin"></i>
+            </div>
+            <div class="task-details">
+                <div class="task-title">Sign Up on Binance</div>
+                <div class="task-description">Verify your email address</div>
+                <div class="task-reward">
+                    <span class="points">+150 points</span>
+                    <span class="payout">Earns us $5.00</span>
+                </div>
+            </div>
+            <button class="task-button">Start</button>
+        </div>
+    </div>
+    
+    <div class="loading" id="loading">
+        <p>Verifying your task completion...</p>
     </div>
 
-    <!-- More tasks can be added here -->
-  </div>
-
-  <script>
-    function claimTask(taskName) {
-      if (localStorage.getItem(taskName)) {
-        alert("You've already claimed this reward!");
-        return;
-      }
-
-      let points = parseInt(localStorage.getItem("points") || 0);
-      points += 10;
-      localStorage.setItem("points", points);
-      localStorage.setItem(taskName, "done");
-
-      alert("10 points added! Go check your dashboard.");
-      window.parent.postMessage({ type: "addPoints", points: 10 }, "*");
-    }
-  </script>
+    <!-- Font Awesome for icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+    
+    <script>
+        // User points system
+        let points = localStorage.getItem('userPoints') || 0;
+        document.getElementById('user-points').textContent = points;
+        
+        // Track completed tasks
+        let completedTasks = JSON.parse(localStorage.getItem('completedTasks') || [];
+        
+        // Initialize task buttons
+        document.querySelectorAll('.task-card').forEach(card => {
+            const taskId = card.getAttribute('data-task-id');
+            const button = card.querySelector('.task-button');
+            
+            if (completedTasks.includes(taskId)) {
+                button.textContent = 'Completed';
+                button.classList.add('completed');
+                button.disabled = true;
+            }
+            
+            button.addEventListener('click', () => startTask(taskId, card));
+        });
+        
+        // Task handler
+        function startTask(taskId, cardElement) {
+            const loadingElement = document.getElementById('loading');
+            const button = cardElement.querySelector('.task-button');
+            
+            // Show loading state
+            button.disabled = true;
+            loadingElement.style.display = 'block';
+            
+            // Simulate opening offer (replace with real offerwall URL)
+            let offerUrl;
+            let pointsToAdd;
+            
+            switch(taskId) {
+                case 'install_game_1':
+                    offerUrl = 'https://offertoro.com/offer?id=12345';
+                    pointsToAdd = 50;
+                    break;
+                case 'install_app_2':
+                    offerUrl = 'https://adgem.com/offer?id=67890';
+                    pointsToAdd = 80;
+                    break;
+                case 'survey_1':
+                    offerUrl = 'https://cpx-research.com/survey/xyz';
+                    pointsToAdd = 30;
+                    break;
+                case 'crypto_signup_1':
+                    offerUrl = 'https://bitmedia.io/offer/binance';
+                    pointsToAdd = 150;
+                    break;
+                default:
+                    offerUrl = '#';
+                    pointsToAdd = 0;
+            }
+            
+            // Open offer in new tab
+            window.open(offerUrl, '_blank');
+            
+            // In a real app, you would:
+            // 1. Set up postback URLs with your offerwall networks
+            // 2. Handle server-side verification
+            // 3. Award points via WebSocket or polling
+            
+            // For demo purposes, we'll simulate completion after 5 seconds
+            setTimeout(() => {
+                // Mark as completed
+                completedTasks.push(taskId);
+                localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+                
+                // Award points
+                points += pointsToAdd;
+                localStorage.setItem('userPoints', points);
+                document.getElementById('user-points').textContent = points;
+                
+                // Update UI
+                button.textContent = 'Completed';
+                button.classList.add('completed');
+                loadingElement.style.display = 'none';
+                
+                // Show confirmation
+                alert(`Task completed! +${pointsToAdd} points added.`);
+            }, 5000);
+        }
+        
+        // Telegram WebApp integration
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.expand();
+            Telegram.WebApp.enableClosingConfirmation();
+            
+            // Send points data to Telegram
+            function updateTelegramPoints() {
+                Telegram.WebApp.sendData(JSON.stringify({
+                    points: points,
+                    completedTasks: completedTasks.length
+                }));
+            }
+        }
+    </script>
 </body>
-</html>
+                  </html>
