@@ -2,24 +2,138 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Watch Ads - Earn Crypto</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earn Points - Watch Ads</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: white;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .ad-container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1e1e1e;
+      border-radius: 10px;
+    }
+    #video-ad {
+      width: 100%;
+      height: 225px;
+      background: black;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+    .btn {
+      background: #00ff80;
+      color: black;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 10px;
+    }
+    #ad-status {
+      margin: 15px 0;
+      min-height: 20px;
+      color: #00ff80;
+    }
+    .points-info {
+      font-size: 14px;
+      color: #aaa;
+    }
+  </style>
 </head>
 <body>
-  <h2>Watch and Earn</h2>
+  <div class="ad-container">
+    <h2>Watch Ads & Earn Points</h2>
+    <p>Get 10 points for each completed ad</p>
+    
+    <div id="video-ad">
+      <p>Ad will appear here</p>
+    </div>
+    
+    <div id="ad-status">Ready to watch ads</div>
+    
+    <button id="start-btn" class="btn">Start Ad</button>
+    <button id="claim-btn" class="btn" disabled>Claim 10 Points</button>
+    
+    <div class="points-info">
+      <p>Ads remaining today: <span id="ads-remaining">5</span>/5</p>
+    </div>
+  </div>
 
   <!-- Telega.io SDK -->
   <script src="https://inapp.telega.io/sdk/v1/sdk.js"></script>
   <script>
-    window.addEventListener('load', function () {
-      if (window.TelegaIn && window.TelegaIn.AdsController) {
-        const ads = window.TelegaIn.AdsController.create_miniapp({
-          token: '33c890eb-8afb-43e4-bed5-9e052e2f2e81'
-        });
+    // Initialize with your token and ad block UUID
+    const ads = window.TelegaIn.AdsController.create_miniapp({
+      token: '33c890eb-8afb-43e4-bed5-9e052e2f2e81'
+    });
 
-        // Show a rewarded ad
-        ads.show_rewarded();
-      } else {
-        console.error("TelegaIn SDK not loaded");
+    // DOM elements
+    const startBtn = document.getElementById('start-btn');
+    const claimBtn = document.getElementById('claim-btn');
+    const adStatus = document.getElementById('ad-status');
+    const videoAd = document.getElementById('video-ad');
+    const adsRemaining = document.getElementById('ads-remaining');
+
+    // Track ads watched
+    let adsWatchedToday = 0;
+    const maxAdsPerDay = 5;
+    let adCompleted = false;
+
+    startBtn.addEventListener('click', () => {
+      if (adsWatchedToday >= maxAdsPerDay) {
+        adStatus.textContent = "Daily limit reached!";
+        return;
+      }
+      
+      startBtn.disabled = true;
+      adStatus.textContent = "Loading ad...";
+      
+      // Show Telega.io ad with your specific UUID
+      ads.ad_show({
+        adBlockUuid: "f236061c-ce09-443b-b3fc-94b6f4054bb0",
+        on_open: () => {
+          adStatus.textContent = "Ad is playing...";
+          videoAd.innerHTML = "<p>Please watch the full ad to earn points</p>";
+        },
+        on_reward: () => {
+          adCompleted = true;
+          adStatus.textContent = "Ad completed! Claim your points";
+          claimBtn.disabled = false;
+        },
+        on_error: (err) => {
+          adStatus.textContent = "Error loading ad. Try again.";
+          startBtn.disabled = false;
+          console.error("Ad error:", err);
+        }
+      });
+    });
+
+    claimBtn.addEventListener('click', () => {
+      if (adCompleted) {
+        adsWatchedToday++;
+        adsRemaining.textContent = maxAdsPerDay - adsWatchedToday;
+        
+        // Send points to parent window (your main app)
+        window.parent.postMessage({
+          type: "addPoints",
+          points: 10
+        }, "*");
+        
+        adStatus.textContent = "+10 Points Added!";
+        claimBtn.disabled = true;
+        startBtn.disabled = false;
+        adCompleted = false;
       }
     });
   </script>
