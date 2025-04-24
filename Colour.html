@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Color Prediction Game with TON Wallet</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+      padding: 20px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .tab-buttons {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      background: #ecf0f1;
+      color: #7f8c8d;
+      border-radius: 8px 8px 0 0;
+      margin: 0 5px;
+    }
+    .tab-btn.active {
+      background: white;
+      color: #3498db;
+      font-weight: bold;
+    }
+    .tab {
+      display: none;
+    }
+    .tab.active {
+      display: block;
+    }
+    input {
+      padding: 8px;
+      margin: 5px;
+      width: 80%;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .deposit-btn {
+      background: #2ecc71;
+      color: white;
+    }
+    .withdraw-btn {
+      background: #e74c3c;
+      color: white;
+    }
+    #gameRedBtn { background: #e74c3c; color: white; }
+    #gameGreenBtn { background: #2ecc71; color: white; }
+    .bet-btn { background: #3498db; color: white; }
+    .bet-btn.active {
+      background: #2980b9;
+      box-shadow: 0 0 0 2px white, 0 0 0 4px #3498db;
+    }
+    .timer {
+      font-size: 28px;
+      font-weight: bold;
+      color: #e74c3c;
+      margin: 15px 0;
+    }
+    .win-message {
+      color: #2ecc71;
+      font-weight: bold;
+    }
+    .lose-message {
+      color: #e74c3c;
+    }
+    #pendingWithdrawals {
+      margin-top: 20px;
+      text-align: left;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="openTab('game')">🎮 Game</button>
+      <button class="tab-btn" onclick="openTab('wallet')">💰 Wallet</button>
+      <button class="tab-btn" onclick="openTab('admin')">🔧 Admin</button>
+    </div>
+    
+    <!-- Game Tab -->
+    <div id="gameTab" class="tab active">
+      <h1>🎯 Color Prediction</h1>
+      <p>Balance: <span id="gameBalance">0</span> coins</p>
+      
+      <div class="timer" id="gameTimer">60</div>
+      
+      <div id="gameStats">
+        <div>Red Bets: <span id="redBets">0</span> coins</div>
+        <div>Green Bets: <span id="greenBets">0</span> coins</div>
+      </div>
+      
+      <div>
+        <button id="gameRedBtn" onclick="placeBet('red')">RED</button>
+        <button id="gameGreenBtn" onclick="placeBet('green')">GREEN</button>
+      </div>
+      
+      <h3>Bet Amount:</h3>
+      <div>
+        <button class="bet-btn" onclick="setBet(1)">1</button>
+        <button class="bet-btn" onclick="setBet(5)">5</button>
+        <button class="bet-btn" onclick="setBet(10)">10</button>
+        <button class="bet-btn" onclick="setBet(20)">20</button>
+      </div>
+      
+      <div id="gameResult"></div>
+    </div>
+    
+    <!-- Wallet Tab -->
+    <div id="walletTab" class="tab">
+      <h1>💰 Wallet</h1>
+      <p>Your coins: <span id="walletBalance">0</span></p>
+      <p>≈ <span id="usdtValue">0</span> USDT (1.5x value)</p>
+      
+      <h3>Deposit USDT</h3>
+      <p>Rate: 1 USDT = 10 coins</p>
+      <input type="number" id="depositAmount" placeholder="USDT Amount" min="1">
+      <button class="deposit-btn" onclick="showDepositAddress()">Get Deposit Address</button>
+      <div id="depositAddress" style="margin-top: 10px; word-break: break-all;"></div>
+      
+      <h3>Withdraw USDT</h3>
+      <input type="text" id="withdrawAddress" placeholder="Your USDT Wallet Address">
+      <input type="number" id="withdrawAmount" placeholder="Coin Amount" min="10">
+      <button class="withdraw-btn" onclick="requestWithdrawal()">Request Withdrawal</button>
+      <div id="withdrawResult"></div>
+    </div>
+    
+    <!-- Admin Tab (Visible only if isAdmin=true in console) -->
+    <div id="adminTab" class="tab">
+      <h1>🔧 Admin Panel</h1>
+      <div id="pendingWithdrawals">
+        <h3>Pending Withdrawals</h3>
+        <div id="withdrawalRequests"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =====================
+    // Game Configuration
+    // =====================
+    const COIN_RATE = 10; // 1 USDT = 10 coins
+    const WITHDRAW_RATE = 0.6667; // 1 coin = 0.06667 USDT (1.5x margin)
+    const ADMIN_WALLET = "YOUR_TONKEEPER_USDT_ADDRESS"; // Replace with your address
+    
+    // =====================
+    // Game State
+    // =====================
+    let coins = 0;
+    let currentBet = 0;
+    let timer = 60;
+    let gameActive = false;
+    let countdownInterval;
+    let bets = { red: 0, green: 0 };
+    let selectedBetBtn = null;
+    let userBetColor = null;
+    let withdrawalRequests = [];
+    let isAdmin = false;
+    
+    // =====================
+    // DOM Elements
+    // =====================
+    const gameBalanceEl = document.getElementById("gameBalance");
+    const walletBalanceEl = document.getElementById("walletBalance");
+    const usdtValueEl = document.getElementById("usdtValue");
+    const gameTimerEl = document.getElementById("gameTimer");
+    const gameResultEl = document.getElementById("gameResult");
+    const redBetsEl = document.getElementById("redBets");
+    const greenBetsEl = document.getElementById("greenBets");
+    const depositAddressEl = document.getElementById("depositAddress");
+    const withdrawResultEl = document.getElementById("withdrawResult");
+    const withdrawalRequestsEl = document.getElementById("withdrawalRequests");
+    
+    // =====================
+    // Core Functions
+    // =====================
+    function openTab(tabName) {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      document.getElementById(`${tabName}Tab`).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+    
+    function updateDisplay() {
+      gameBalanceEl.textContent = coins;
+      walletBalanceEl.textContent = coins;
+      usdtValueEl.textContent = (coins * WITHDRAW_RATE).toFixed(4);
+      redBetsEl.textContent = bets.red;
+      greenBetsEl.textContent = bets.green;
+    }
+    
+    // =====================
+    // Game Functions
+    // =====================
+    function setBet(amount) {
+      if (coins >= amount) {
+        currentBet = amount;
+        
+        if (selectedBetBtn) {
+          selectedBetBtn.classList.remove('active');
+        }
+        selectedBetBtn = event.currentTarget;
+        selectedBetBtn.classList.add('active');
+        
+        gameResultEl.innerHTML = `<p>Bet set: ${amount} coins</p>`;
+      } else {
+        gameResultEl.innerHTML = '<p class="lose-message">Not enough coins!</p>';
+      }
+    }
+    
+    function placeBet(color) {
+      if (!gameActive && currentBet > 0 && coins >= currentBet) {
+        gameActive = true;
+        userBetColor = color;
+        coins -= currentBet;
+        bets[color] += currentBet;
+        updateDisplay();
+        
+        document.getElementById("gameRedBtn").disabled = true;
+        document.getElementById("gameGreenBtn").disabled = true;
+        document.querySelectorAll('.bet-btn').forEach(btn => {
+          btn.disabled = true;
+        });
+        
+        timer = 60;
+        gameTimerEl.textContent = timer;
+        countdownInterval = setInterval(updateTimer, 1000);
+      }
+    }
+    
+    function updateTimer() {
+      timer--;
+      gameTimerEl.textContent = timer;
+      
+      if (timer <= 0) {
+        clearInterval(countdownInterval);
+        determineWinner();
+      }
+    }
+    
+    function determineWinner() {
+      const totalBets = bets.red + bets.green;
+      let winningColor;
+      
+      // Anti-majority logic
+      if (bets.red / totalBets > 0.6) {
+        winningColor = "green";
+      } else if (bets.green / totalBets > 0.6) {
+        winningColor = "red";
+      } else {
+        winningColor = Math.random() > 0.5 ? "red" : "green";
+      }
+      
+      if (userBetColor === winningColor) {
+        const winnings = currentBet * 2;
+        coins += winnings;
+        gameResultEl.innerHTML = `
+          <p class="win-message">🎉 Congratulations! You won ${winnings} coins!</p>
+          <p>Winning color: ${winningColor.toUpperCase()}</p>
+        `;
+      } else {
+        gameResultEl.innerHTML = `
+          <p class="lose-message">😢 Sorry, better luck next time!</p>
+          <p>Winning color: ${winningColor.toUpperCase()}</p>
+        `;
+      }
+      
+      updateDisplay();
+      resetGame();
+    }
+    
+    function resetGame() {
+      document.getElementById("gameRedBtn").disabled = false;
+      document.getElementById("gameGreenBtn").disabled = false;
+      document.querySelectorAll('.bet-btn').forEach(btn => {
+        btn.disabled = false;
+      });
+      
+      if (selectedBetBtn) {
+        selectedBetBtn.classList.remove('active');
+        selectedBetBtn = null;
+      }
+      
+      currentBet = 0;
+      gameActive = false;
+      userBetColor = null;
+      bets = { red: 0, green: 0 };
+      timer = 60;
+      gameTimerEl.textContent = timer;
+    }
+    
+    // =====================
+    // Wallet Functions
+    // =====================
+    function showDepositAddress() {
+      const usdtAmount = parseFloat(document.getElementById("depositAmount").value);
+      if (usdtAmount >= 1) {
+        const coinsToAdd = Math.floor(usdtAmount * COIN_RATE);
+        depositAddressEl.innerHTML = `
+          <p>Send <strong>${usdtAmount} USDT</strong> to:</p>
+          <p><code>${ADMIN_WALLET}</code></p>
+          <p>You'll receive <strong>${coinsToAdd} coins</strong> after 3 confirmations</p>
+          <p><button onclick="simulateDeposit(${coinsToAdd})">Simulate Deposit (DEV)</button></p>
+        `;
+      } else {
+        depositAddressEl.innerHTML = '<p style="color:#e74c3c">Minimum deposit: 1 USDT</p>';
+      }
+    }
+    
+    function requestWithdrawal() {
+      const address = document.getElementById("withdrawAddress").value;
+      const amount = parseInt(document.getElementById("withdrawAmount").value);
+      
+      if (!address || address.length < 20) {
+        withdrawResultEl.innerHTML = '<p style="color:#e74c3c">Invalid wallet address</p>';
+        return;
+      }
+      
+      if (amount < 10 || amount > coins) {
+        withdrawResultEl.innerHTML = '<p style="color:#e74c3c">Invalid amount (min 10 coins)</p>';
+        return;
+      }
+      
+      const usdtAmount = (amount * WITHDRAW_RATE).toFixed(4);
+      withdrawalRequests.push({
+        address: address,
+        coins: amount,
+        usdt: usdtAmount,
+        timestamp: new Date().toISOString()
+      });
+      
+      coins -= amount;
+      updateDisplay();
+      
+      withdrawResultEl.innerHTML = `
+        <p style="color:#2ecc71">Withdrawal request submitted!</p>
+        <p>${amount} coins (≈ ${usdtAmount} USDT) to ${address.slice(0, 10)}...${address.slice(-4)}</p>
+        <p>Will be processed within 24 hours</p>
+      `;
+      
+      updateWithdrawalList();
+    }
+    
+    function updateWithdrawalList() {
+      if (!withdrawalRequests.length) {
+        withdrawalRequestsEl.innerHTML = "<p>No pending withdrawals</p>";
+        return;
+      }
+      
+      let html = "";
+      withdrawalRequests.forEach((req, index) => {
+        html += `
+          <div style="border:1px solid #eee; padding:10px; margin:5px 0; border-radius:8px;">
+            <p><strong>#${index + 1}</strong> | ${req.timestamp}</p>
+            <p>${req.coins} coins (${req.usdt} USDT)</p>
+            <p>To: <code>${req.address}</code></p>
+            <button onclick="processWithdrawal(${index})" style="background:#2ecc71; color:white; padding:5px 10px; font-size:12px;">
+              Process
+            </button>
+          </div>
+        `;
+      });
+      
+      withdrawalRequestsEl.innerHTML = html;
+    }
+    
+    function processWithdrawal(index) {
+      if (isAdmin && withdrawalRequests[index]) {
+        alert(`Send ${withdrawalRequests[index].usdt} USDT to ${withdrawalRequests[index].address}`);
+        withdrawalRequests.splice(index, 1);
+        updateWithdrawalList();
+      }
+    }
+    
+    // =====================
+    // Dev Tools (Remove in production)
+    // =====================
+    function simulateDeposit(amount) {
+      coins += amount;
+      updateDisplay();
+      depositAddressEl.innerHTML += '<p style="color:#2ecc71">Deposit simulated! Balance updated.</p>';
+    }
+    
+    // Enable admin mode in console
+    function enableAdminMode() {
+      isAdmin = true;
+      document.getElementById("adminTab").style.display = "block";
+      console.log("Admin mode enabled");
+      updateWithdrawalList();
+    }
+    
+    // Initialize
+    updateDisplay();
+    
+    // For testing - initial coins
+    coins = 100;
+    updateDisplay();
+    
+    // Enable admin mode by running enableAdminMode() in console
+  </script>
+</body>
+  </html>
