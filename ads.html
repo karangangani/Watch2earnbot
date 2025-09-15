@@ -1,139 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Earn Points - Watch Ads</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Watch Ads - EarnCrypto</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #121212;
-      color: white;
       margin: 0;
-      padding: 20px;
-      text-align: center;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      padding: 1rem;
     }
-    .ad-container {
-      max-width: 400px;
-      margin: 0 auto;
-      padding: 20px;
-      background: #1e1e1e;
-      border-radius: 10px;
-    }
-    #video-ad {
-      width: 100%;
-      height: 225px;
-      background: black;
-      margin: 20px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-    }
+    h1 { text-align: center; margin-bottom: 1rem; }
     .btn {
-      background: #00ff80;
-      color: black;
+      background-color: #0f0;
+      color: #000;
+      padding: 1rem;
       border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
+      border-radius: 5px;
       font-weight: bold;
       cursor: pointer;
-      margin: 10px;
+      width: 100%;
+      max-width: 400px;
+      margin: 10px auto;
+      display: block;
     }
-    #ad-status {
-      margin: 15px 0;
-      min-height: 20px;
-      color: #00ff80;
-    }
-    .points-info {
-      font-size: 14px;
-      color: #aaa;
-    }
+    .btn:disabled { background-color: #555; color: #aaa; }
+    .info { text-align: center; margin-top: 1rem; }
   </style>
 </head>
 <body>
-  <div class="ad-container">
-    <h2>Watch Ads & Earn Points</h2>
-    <p>Get 10 points for each completed ad</p>
-    
-    <div id="video-ad">
-      <p>Ad will appear here</p>
-    </div>
-    
-    <div id="ad-status">Ready to watch ads</div>
-    
-    <button id="start-btn" class="btn">Start Ad</button>
-    <button id="claim-btn" class="btn" disabled>Claim 10 Points</button>
-    
-    <div class="points-info">
-      <p>Ads remaining today: <span id="ads-remaining">5</span>/5</p>
-    </div>
+  <h1>EarnCrypto - Watch Ads</h1>
+
+  <button class="btn" id="watchInterstitial">Watch Ad (Rewarded Interstitial)</button>
+  <button class="btn" id="watchPopup">Watch Ad (Rewarded Popup)</button>
+
+  <div class="info">
+    <p>Ads watched today: <span id="watchedCount">0</span>/15</p>
+    <p>Total Points: <span id="totalPoints">0</span></p>
   </div>
 
-  <!-- Telega.io SDK -->
-  <script src="https://inapp.telega.io/sdk/v1/sdk.js"></script>
   <script>
-    // Initialize with your token and ad block UUID
-    const ads = window.TelegaIn.AdsController.create_miniapp({
-      token: '33c890eb-8afb-43e4-bed5-9e052e2f2e81'
-    });
+    // Load saved data
+    let adsWatched = parseInt(localStorage.getItem("adsWatched") || "0");
+    let points = parseInt(localStorage.getItem("points") || "0");
 
-    // DOM elements
-    const startBtn = document.getElementById('start-btn');
-    const claimBtn = document.getElementById('claim-btn');
-    const adStatus = document.getElementById('ad-status');
-    const videoAd = document.getElementById('video-ad');
-    const adsRemaining = document.getElementById('ads-remaining');
+    document.getElementById("watchedCount").textContent = adsWatched;
+    document.getElementById("totalPoints").textContent = points;
 
-    // Track ads watched
-    let adsWatchedToday = 0;
-    const maxAdsPerDay = 5;
-    let adCompleted = false;
+    // Reset after 24h
+    const lastVisit = localStorage.getItem("lastVisit") || Date.now();
+    if (Date.now() - lastVisit > 86400000) {
+      adsWatched = 0;
+      localStorage.setItem("adsWatched", adsWatched);
+    }
+    localStorage.setItem("lastVisit", Date.now());
 
-    startBtn.addEventListener('click', () => {
-      if (adsWatchedToday >= maxAdsPerDay) {
-        adStatus.textContent = "Daily limit reached!";
-        return;
+    // Function to reward user
+    function rewardUser() {
+      if (adsWatched < 15) {
+        adsWatched++;
+        points += 10;
+        localStorage.setItem("adsWatched", adsWatched);
+        localStorage.setItem("points", points);
+        document.getElementById("watchedCount").textContent = adsWatched;
+        document.getElementById("totalPoints").textContent = points;
+        alert("🎉 You earned 10 points!");
+      } else {
+        alert("⚠️ Daily ad limit reached!");
       }
-      
-      startBtn.disabled = true;
-      adStatus.textContent = "Loading ad...";
-      
-      // Show Telega.io ad with your specific UUID
-      ads.ad_show({
-        adBlockUuid: "f236061c-ce09-443b-b3fc-94b6f4054bb0",
-        on_open: () => {
-          adStatus.textContent = "Ad is playing...";
-          videoAd.innerHTML = "<p>Please watch the full ad to earn points</p>";
-        },
-        on_reward: () => {
-          adCompleted = true;
-          adStatus.textContent = "Ad completed! Claim your points";
-          claimBtn.disabled = false;
-        },
-        on_error: (err) => {
-          adStatus.textContent = "Error loading ad. Try again.";
-          startBtn.disabled = false;
-          console.error("Ad error:", err);
-        }
-      });
-    });
+    }
 
-    claimBtn.addEventListener('click', () => {
-      if (adCompleted) {
-        adsWatchedToday++;
-        adsRemaining.textContent = maxAdsPerDay - adsWatchedToday;
-        
-        // Send points to parent window (your main app)
-        window.parent.postMessage({
-          type: "addPoints",
-          points: 10
-        }, "*");
-        
-        adStatus.textContent = "+10 Points Added!";
-        claimBtn.disabled = true;
-        startBtn.disabled = false;
-        adCompleted = false;
+    // Rewarded Interstitial
+    document.getElementById("watchInterstitial").onclick = () => {
+      if (adsWatched < 15) {
+        show_9242009().then(() => {
+          rewardUser();
+        }).catch(() => {
+          alert("Ad failed to load. Try again!");
+        });
+      } else {
+        alert("⚠️ Daily ad limit reached!");
+      }
+    };
+
+    // Rewarded Popup
+    document.getElementById("watchPopup").onclick = () => {
+      if (adsWatched < 15) {
+        show_9242009('pop').then(() => {
+          rewardUser();
+        }).catch(() => {
+          alert("Ad failed to load. Try again!");
+        });
+      } else {
+        alert("⚠️ Daily ad limit reached!");
+      }
+    };
+
+    // In-App Interstitial (auto show ads, no reward)
+    show_9242009({
+      type: 'inApp',
+      inAppSettings: {
+        frequency: 2,
+        capping: 0.1,
+        interval: 30,
+        timeout: 5,
+        everyPage: false
       }
     });
   </script>
