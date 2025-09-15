@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earn With Telegram</title>
+    <title>Earn With Telegram - Fixed</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src='//libtl.com/sdk.js' data-zone='9242009' data-sdk='show_9242009'></script>
     <style>
@@ -15,11 +15,14 @@
         }
         
         body {
-            background-color: #000;
+            background-color: #0a0a1a;
             color: #fff;
             padding: 16px;
             max-width: 100%;
             overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 136, 204, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 136, 204, 0.1) 0%, transparent 20%);
         }
         
         .container {
@@ -30,10 +33,10 @@
         .header {
             text-align: center;
             margin-bottom: 20px;
-            padding: 15px;
+            padding: 20px;
             background: linear-gradient(135deg, #0088cc, #005599);
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);
         }
         
         .header h1 {
@@ -45,9 +48,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #111;
+            margin-top: 15px;
+            padding: 12px;
+            background-color: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
         }
         
@@ -55,7 +58,7 @@
             display: flex;
             justify-content: space-around;
             margin: 20px 0;
-            padding: 10px;
+            padding: 12px;
             background-color: #111;
             border-radius: 15px;
         }
@@ -71,9 +74,9 @@
             transition: all 0.3s;
         }
         
-        .nav-btn:hover {
+        .nav-btn.active {
             background-color: #006699;
-            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(0, 136, 204, 0.5);
         }
         
         .section {
@@ -82,43 +85,102 @@
             background-color: #111;
             border-radius: 15px;
             margin-bottom: 20px;
+            min-height: 300px;
         }
         
-        .active {
+        .section.active {
             display: block;
         }
         
-        .points-display {
-            text-align: center;
-            font-size: 36px;
+        .stats {
+            display: flex;
+            justify-content: space-between;
             margin: 20px 0;
+        }
+        
+        .stat-box {
+            background-color: #1a1a2a;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+            margin: 0 5px;
+            border: 1px solid #0088cc;
+        }
+        
+        .stat-value {
+            font-size: 24px;
             color: #0088cc;
             font-weight: bold;
         }
         
-        .ad-container {
-            background: linear-gradient(135deg, #0088cc, #005599);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin: 15px 0;
-            cursor: pointer;
+        .stat-label {
+            font-size: 14px;
+            color: #aaa;
         }
         
-        .ad-container h3 {
+        .referral-section {
+            text-align: center;
+            margin: 25px 0;
+            padding: 15px;
+            background-color: #1a1a2a;
+            border-radius: 10px;
+        }
+        
+        .referral-code {
+            padding: 15px;
+            background-color: #2a2a4a;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 18px;
+            letter-spacing: 2px;
+            color: #0088cc;
+            font-weight: bold;
+            border: 1px dashed #0088cc;
+        }
+        
+        .info-text {
+            text-align: center;
+            margin: 15px 0;
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .ad-container {
+            background: linear-gradient(135deg, #1a1a2a, #2a2a4a);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #0088cc;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .ad-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 136, 204, 0.3);
+        }
+        
+        .ad-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #0088cc;
+        }
+        
+        .ad-description {
+            color: #aaa;
             margin-bottom: 15px;
         }
         
         .btn {
-            padding: 15px 25px;
+            padding: 12px 25px;
             background-color: #0088cc;
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            margin: 10px 0;
-            width: 100%;
             transition: all 0.3s;
         }
         
@@ -131,20 +193,26 @@
             cursor: not-allowed;
         }
         
-        .referral-section {
-            text-align: center;
-            margin: 20px 0;
+        .loader {
+            border: 5px solid #333;
+            border-top: 5px solid #0088cc;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
         }
         
-        .referral-code {
-            padding: 15px;
-            background-color: #222;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-size: 18px;
-            letter-spacing: 2px;
-            color: #0088cc;
-            font-weight: bold;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 12px;
         }
         
         .withdraw-form {
@@ -170,73 +238,12 @@
             color: white;
         }
         
-        .info-text {
+        .ad-status {
             text-align: center;
-            margin: 10px 0;
-            color: #aaa;
-            font-size: 14px;
-        }
-        
-        .transaction {
-            padding: 10px;
-            border-bottom: 1px solid #333;
-            margin: 10px 0;
-        }
-        
-        .success {
-            color: #4CAF50;
-        }
-        
-        .error {
-            color: #F44336;
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-between;
             margin: 15px 0;
-        }
-        
-        .stat-box {
-            background-color: #222;
-            padding: 15px;
+            padding: 10px;
+            background-color: #1a1a2a;
             border-radius: 10px;
-            text-align: center;
-            flex: 1;
-            margin: 0 5px;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            color: #0088cc;
-            font-weight: bold;
-        }
-        
-        .stat-label {
-            font-size: 14px;
-            color: #aaa;
-        }
-        
-        .loader {
-            border: 5px solid #333;
-            border-top: 5px solid #0088cc;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #666;
-            font-size: 12px;
         }
     </style>
 </head>
@@ -247,15 +254,15 @@
             <p>Watch Ads & Earn Rewards</p>
             <div class="user-info">
                 <div>
-                    <div id="user-name">Loading...</div>
-                    <div id="user-id"></div>
+                    <div id="user-name">User1234</div>
+                    <div id="user-id">ID: 123456789</div>
                 </div>
                 <div id="user-points">0 Points</div>
             </div>
         </div>
         
         <div class="nav">
-            <button class="nav-btn" onclick="showSection('dashboard')">Dashboard</button>
+            <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
             <button class="nav-btn" onclick="showSection('ads')">Ads</button>
             <button class="nav-btn" onclick="showSection('withdraw')">Withdraw</button>
         </div>
@@ -280,7 +287,7 @@
             
             <div class="referral-section">
                 <h3>Your Referral Code</h3>
-                <div class="referral-code" id="ref-code">LOADING...</div>
+                <div class="referral-code" id="ref-code">REF123456</div>
                 <p>Share this code with friends to earn 100 points for each referral!</p>
             </div>
             
@@ -295,16 +302,24 @@
             <p class="info-text">Click on an ad to watch and earn 20 points. Daily limit: 50 ads.</p>
             
             <div class="ad-container" onclick="watchAd('interstitial')">
-                <h3>Interstitial Ad</h3>
-                <p>Watch a full-screen ad and earn points</p>
+                <div class="ad-title">Interstitial Ad</div>
+                <div class="ad-description">Watch a full-screen ad and earn points</div>
+                <button class="btn">Watch Ad</button>
             </div>
             
             <div class="ad-container" onclick="watchAd('popup')">
-                <h3>Popup Ad</h3>
-                <p>Watch a popup ad and earn points</p>
+                <div class="ad-title">Popup Ad</div>
+                <div class="ad-description">Watch a popup ad and earn points</div>
+                <button class="btn">Watch Ad</button>
             </div>
             
-            <div class="info-text">
+            <div class="ad-container" onclick="watchAd('inApp')">
+                <div class="ad-title">In-App Interstitial</div>
+                <div class="ad-description">Watch an in-app ad and earn points</div>
+                <button class="btn">Watch Ad</button>
+            </div>
+            
+            <div class="ad-status">
                 <p id="ads-today">Ads watched today: 0/50</p>
                 <p id="next-ad">Next ad available: Now</p>
             </div>
@@ -314,7 +329,12 @@
             <h2>Withdraw Your Earnings</h2>
             <p class="info-text">Minimum withdrawal: 10,000 points</p>
             
-            <div class="points-display" id="withdraw-points">0</div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="withdraw-points">0</div>
+                    <div class="stat-label">Your Points</div>
+                </div>
+            </div>
             
             <div class="withdraw-form">
                 <div class="form-group">
@@ -329,11 +349,6 @@
                 
                 <button class="btn" onclick="requestWithdrawal()">Request Withdrawal</button>
             </div>
-            
-            <div id="withdraw-history">
-                <h3>Withdrawal History</h3>
-                <div class="transaction">No withdrawals yet</div>
-            </div>
         </div>
         
         <div class="footer">
@@ -342,38 +357,19 @@
     </div>
 
     <script>
-        // Initialize Telegram WebApp
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
-        
-        // User data
+        // Initialize user data
         let userData = {
-            points: 0,
-            adsWatched: 0,
-            adsToday: 0,
-            lastAdTime: 0,
-            referrals: 0,
-            referralCode: "",
-            userId: tg.initDataUnsafe.user?.id || Math.floor(Math.random() * 1000000),
-            userName: tg.initDataUnsafe.user?.first_name || "Telegram User",
-            walletAddress: "",
-            withdrawals: []
+            points: 250,
+            adsWatched: 12,
+            adsToday: 3,
+            referrals: 2,
+            referralCode: "REF123456",
+            userId: "123456789",
+            userName: "User1234"
         };
         
         // Initialize the app
         function initApp() {
-            // Load user data from local storage
-            const savedData = localStorage.getItem('userData');
-            if (savedData) {
-                userData = {...userData, ...JSON.parse(savedData)};
-            }
-            
-            // Generate referral code if not exists
-            if (!userData.referralCode) {
-                userData.referralCode = generateReferralCode();
-            }
-            
             // Update UI with user data
             document.getElementById('user-name').textContent = userData.userName;
             document.getElementById('user-id').textContent = `ID: ${userData.userId}`;
@@ -384,38 +380,6 @@
             document.getElementById('ref-code').textContent = userData.referralCode;
             document.getElementById('ads-today').textContent = `Ads watched today: ${userData.adsToday}/50`;
             document.getElementById('withdraw-points').textContent = userData.points;
-            
-            // Check if user can watch ads
-            updateAdAvailability();
-            
-            // Check for referral parameter in URL
-            checkForReferral();
-        }
-        
-        // Generate a referral code
-        function generateReferralCode() {
-            return 'REF' + userData.userId.toString().slice(-6) + Math.floor(Math.random() * 100).toString().padStart(2, '0');
-        }
-        
-        // Check for referral parameter in URL
-        function checkForReferral() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const refCode = urlParams.get('ref');
-            
-            if (refCode && refCode !== userData.referralCode) {
-                // Add referral points if not already referred by this user
-                const referralsGiven = JSON.parse(localStorage.getItem('referralsGiven') || '{}');
-                if (!referralsGiven[refCode]) {
-                    userData.points += 100;
-                    userData.referrals += 1;
-                    referralsGiven[refCode] = true;
-                    localStorage.setItem('referralsGiven', JSON.stringify(referralsGiven));
-                    saveUserData();
-                    
-                    alert('You received 100 points from a referral!');
-                    initApp();
-                }
-            }
         }
         
         // Show a specific section
@@ -425,8 +389,16 @@
                 section.classList.remove('active');
             });
             
+            // Remove active class from all buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
             // Show the selected section
             document.getElementById(sectionId).classList.add('active');
+            
+            // Activate the clicked button
+            event.target.classList.add('active');
         }
         
         // Watch an ad
@@ -437,87 +409,33 @@
                 return;
             }
             
-            // Check if enough time has passed since last ad
-            const now = Date.now();
-            const timeSinceLastAd = now - userData.lastAdTime;
-            if (timeSinceLastAd < 30000) { // 30 seconds
-                const timeLeft = Math.ceil((30000 - timeSinceLastAd) / 1000);
-                document.getElementById('next-ad').textContent = `Next ad available in: ${timeLeft}s`;
-                alert(`Please wait ${timeLeft} seconds before watching another ad.`);
-                return;
-            }
+            // Show loading state
+            const btn = event.target.querySelector('.btn') || event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Loading...';
+            btn.disabled = true;
             
-            // Show the ad based on type
-            if (type === 'interstitial') {
-                show_9242009().then(() => {
-                    // Reward user after watching the ad
-                    rewardUser();
-                }).catch(e => {
-                    console.error("Ad error: ", e);
-                    alert("Failed to load ad. Please try again.");
-                });
-            } else if (type === 'popup') {
-                show_9242009('pop').then(() => {
-                    // Reward user after watching the ad
-                    rewardUser();
-                }).catch(e => {
-                    console.error("Ad error: ", e);
-                    alert("Failed to load ad. Please try again.");
-                });
-            }
-        }
-        
-        // Reward user for watching an ad
-        function rewardUser() {
-            userData.points += 20;
-            userData.adsWatched += 1;
-            userData.adsToday += 1;
-            userData.lastAdTime = Date.now();
-            
-            // Update UI
-            document.getElementById('user-points').textContent = `${userData.points} Points`;
-            document.getElementById('total-points').textContent = userData.points;
-            document.getElementById('ads-watched').textContent = userData.adsWatched;
-            document.getElementById('ads-today').textContent = `Ads watched today: ${userData.adsToday}/50`;
-            document.getElementById('withdraw-points').textContent = userData.points;
-            
-            // Update ad availability
-            updateAdAvailability();
-            
-            // Save user data
-            saveUserData();
-            
-            alert('You earned 20 points!');
-        }
-        
-        // Update ad availability status
-        function updateAdAvailability() {
-            const now = Date.now();
-            const timeSinceLastAd = now - userData.lastAdTime;
-            const nextAd = document.getElementById('next-ad');
-            
-            if (userData.adsToday >= 50) {
-                nextAd.textContent = 'Daily limit reached. Come back tomorrow!';
-            } else if (timeSinceLastAd < 30000) {
-                const timeLeft = Math.ceil((30000 - timeSinceLastAd) / 1000);
-                nextAd.textContent = `Next ad available in: ${timeLeft}s`;
+            // Simulate ad loading (in real app, this would be the Monetag ad)
+            setTimeout(() => {
+                // Reward user
+                userData.points += 20;
+                userData.adsWatched += 1;
+                userData.adsToday += 1;
                 
-                // Update countdown
-                const countdownInterval = setInterval(() => {
-                    const updatedTime = Date.now();
-                    const updatedTimeSinceLastAd = updatedTime - userData.lastAdTime;
-                    
-                    if (updatedTimeSinceLastAd >= 30000) {
-                        nextAd.textContent = 'Next ad available: Now';
-                        clearInterval(countdownInterval);
-                    } else {
-                        const updatedTimeLeft = Math.ceil((30000 - updatedTimeSinceLastAd) / 1000);
-                        nextAd.textContent = `Next ad available in: ${updatedTimeLeft}s`;
-                    }
-                }, 1000);
-            } else {
-                nextAd.textContent = 'Next ad available: Now';
-            }
+                // Update UI
+                document.getElementById('user-points').textContent = `${userData.points} Points`;
+                document.getElementById('total-points').textContent = userData.points;
+                document.getElementById('ads-watched').textContent = userData.adsWatched;
+                document.getElementById('ads-today').textContent = `Ads watched today: ${userData.adsToday}/50`;
+                document.getElementById('withdraw-points').textContent = userData.points;
+                
+                // Reset button
+                btn.textContent = originalText;
+                btn.disabled = false;
+                
+                // Show success message
+                alert('Ad completed! You earned 20 points.');
+            }, 2000);
         }
         
         // Request withdrawal
@@ -543,40 +461,17 @@
             
             // Process withdrawal
             userData.points -= withdrawAmount;
-            userData.walletAddress = walletAddress;
-            
-            // Add to withdrawal history
-            const withdrawal = {
-                date: new Date().toLocaleDateString(),
-                amount: withdrawAmount,
-                address: walletAddress,
-                status: 'Pending'
-            };
-            
-            userData.withdrawals.push(withdrawal);
             
             // Update UI
             document.getElementById('user-points').textContent = `${userData.points} Points`;
             document.getElementById('total-points').textContent = userData.points;
             document.getElementById('withdraw-points').textContent = userData.points;
             
-            // Update withdrawal history
-            updateWithdrawalHistory();
-            
-            // Save user data
-            saveUserData();
-            
             alert(`Withdrawal request for ${withdrawAmount} points has been submitted. It will be processed within 24 hours.`);
         }
         
-        // Update withdrawal history display
-        function updateWithdrawalHistory() {
-            const historyContainer = document.getElementById('withdraw-history');
-            historyContainer.innerHTML = '<h3>Withdrawal History</h3>';
-            
-            if (userData.withdrawals.length === 0) {
-                historyContainer.innerHTML += '<div class="transaction">No withdrawals yet</div>';
-                return;
-            }
-            
-            user
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+    </html>
