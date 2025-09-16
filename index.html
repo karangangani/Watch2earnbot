@@ -7,252 +7,40 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src='//libtl.com/sdk.js' data-zone='9242009' data-sdk='show_9242009'></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #0a0a1a;
-            color: #fff;
-            padding: 16px;
-            max-width: 100%;
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(0, 136, 204, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(0, 136, 204, 0.1) 0%, transparent 20%);
-        }
-        
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: linear-gradient(135deg, #0088cc, #005599);
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);
-        }
-        
-        .header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        
-        .user-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            padding: 12px;
-            background-color: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-        }
-        
-        .nav {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-            padding: 12px;
-            background-color: #111;
-            border-radius: 15px;
-        }
-        
-        .nav-btn {
-            padding: 12px 20px;
-            background-color: #0088cc;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        
-        .nav-btn.active {
-            background-color: #006699;
-            box-shadow: 0 0 15px rgba(0, 136, 204, 0.5);
-        }
-        
-        .section {
-            display: none;
-            padding: 20px;
-            background-color: #111;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            min-height: 300px;
-        }
-        
-        .section.active {
-            display: block;
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-        }
-        
-        .stat-box {
-            background-color: #1a1a2a;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            flex: 1;
-            margin: 0 5px;
-            border: 1px solid #0088cc;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            color: #0088cc;
-            font-weight: bold;
-        }
-        
-        .stat-label {
-            font-size: 14px;
-            color: #aaa;
-        }
-        
-        .referral-section {
-            text-align: center;
-            margin: 25px 0;
-            padding: 15px;
-            background-color: #1a1a2a;
-            border-radius: 10px;
-        }
-        
-        .referral-code {
-            padding: 15px;
-            background-color: #2a2a4a;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-size: 18px;
-            letter-spacing: 2px;
-            color: #0088cc;
-            font-weight: bold;
-            border: 1px dashed #0088cc;
-        }
-        
-        .info-text {
-            text-align: center;
-            margin: 15px 0;
-            color: #aaa;
-            font-size: 14px;
-        }
-        
-        .ad-container {
-            background: linear-gradient(135deg, #1a1a2a, #2a2a4a);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            text-align: center;
-            border: 1px solid #0088cc;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .ad-container:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 136, 204, 0.3);
-        }
-        
-        .ad-title {
-            font-size: 20px;
-            margin-bottom: 10px;
-            color: #0088cc;
-        }
-        
-        .ad-description {
-            color: #aaa;
-            margin-bottom: 15px;
-        }
-        
-        .btn {
-            padding: 12px 25px;
-            background-color: #0088cc;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        
-        .btn:hover {
-            background-color: #006699;
-        }
-        
-        .btn:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-        }
-        
-        .loader {
-            border: 5px solid #333;
-            border-top: 5px solid #0088cc;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-            display: none;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #666;
-            font-size: 12px;
-        }
-        
-        .withdraw-form {
-            margin-top: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            background-color: #222;
-            color: white;
-        }
-        
-        .ad-status {
-            text-align: center;
-            margin: 15px 0;
-            padding: 10px;
-            background-color: #1a1a2a;
-            border-radius: 10px;
-        }
-        
-        .countdown {
-            font-size: 18px;
-            color: #0088cc;
-            font-weight: bold;
-            margin: 10px 0;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0a0a1a; color: #fff; padding: 16px; max-width: 100%; overflow-x: hidden; background-image: radial-gradient(circle at 10% 20%, rgba(0, 136, 204, 0.1) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(0, 136, 204, 0.1) 0%, transparent 20%); }
+        .container { max-width: 500px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #0088cc, #005599); border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4); }
+        .header h1 { font-size: 24px; margin-bottom: 5px; }
+        .user-info { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px; background-color: rgba(0, 0, 0, 0.3); border-radius: 10px; }
+        .nav { display: flex; justify-content: space-around; margin: 20px 0; padding: 12px; background-color: #111; border-radius: 15px; }
+        .nav-btn { padding: 12px 20px; background-color: #0088cc; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .nav-btn.active { background-color: #006699; box-shadow: 0 0 15px rgba(0, 136, 204, 0.5); }
+        .section { display: none; padding: 20px; background-color: #111; border-radius: 15px; margin-bottom: 20px; min-height: 300px; }
+        .section.active { display: block; }
+        .stats { display: flex; justify-content: space-between; margin: 20px 0; }
+        .stat-box { background-color: #1a1a2a; padding: 15px; border-radius: 10px; text-align: center; flex: 1; margin: 0 5px; border: 1px solid #0088cc; }
+        .stat-value { font-size: 24px; color: #0088cc; font-weight: bold; }
+        .stat-label { font-size: 14px; color: #aaa; }
+        .referral-section { text-align: center; margin: 25px 0; padding: 15px; background-color: #1a1a2a; border-radius: 10px; }
+        .referral-code { padding: 15px; background-color: #2a2a4a; border-radius: 10px; margin: 15px 0; font-size: 18px; letter-spacing: 2px; color: #0088cc; font-weight: bold; border: 1px dashed #0088cc; }
+        .info-text { text-align: center; margin: 15px 0; color: #aaa; font-size: 14px; }
+        .ad-container { background: linear-gradient(135deg, #1a1a2a, #2a2a4a); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; border: 1px solid #0088cc; cursor: pointer; transition: all 0.3s; }
+        .ad-container:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 136, 204, 0.3); }
+        .ad-title { font-size: 20px; margin-bottom: 10px; color: #0088cc; }
+        .ad-description { color: #aaa; margin-bottom: 15px; }
+        .btn { padding: 12px 25px; background-color: #0088cc; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .btn:hover { background-color: #006699; }
+        .btn:disabled { background-color: #555; cursor: not-allowed; }
+        .loader { border: 5px solid #333; border-top: 5px solid #0088cc; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        .withdraw-form { margin-top: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #333; background-color: #222; color: white; }
+        .ad-status { text-align: center; margin: 15px 0; padding: 10px; background-color: #1a1a2a; border-radius: 10px; }
+        .countdown { font-size: 18px; color: #0088cc; font-weight: bold; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -277,7 +65,6 @@
         
         <div id="dashboard" class="section active">
             <h2>Your Dashboard</h2>
-            
             <div class="stats">
                 <div class="stat-box">
                     <div class="stat-value" id="total-points">0</div>
@@ -292,13 +79,11 @@
                     <div class="stat-label">Referrals</div>
                 </div>
             </div>
-            
             <div class="referral-section">
                 <h3>Your Referral Code</h3>
                 <div class="referral-code" id="ref-code">Loading...</div>
                 <p>Share this code with friends to earn 100 points for each referral!</p>
             </div>
-            
             <div class="info-text">
                 <p>🎯 Daily Limit: 50 ads per day</p>
                 <p>💰 Each ad gives you 20 points</p>
@@ -308,27 +93,22 @@
         <div id="ads" class="section">
             <h2>Watch Ads & Earn Points</h2>
             <p class="info-text">Click on an ad to watch and earn 20 points. Daily limit: 50 ads.</p>
-            
             <div class="ad-container" onclick="watchAd('interstitial')">
-                <div class="ad-title">Interstitial Ad</div>
+                <div class="ad-title">Rewarded Interstitial Ad</div>
                 <div class="ad-description">Watch a full-screen ad and earn 20 points</div>
                 <button class="btn">Watch Ad</button>
             </div>
-            
             <div class="ad-container" onclick="watchAd('popup')">
-                <div class="ad-title">Popup Ad</div>
+                <div class="ad-title">Rewarded Popup Ad</div>
                 <div class="ad-description">Watch a popup ad and earn 20 points</div>
                 <button class="btn">Watch Ad</button>
             </div>
-            
             <div class="ad-container" onclick="watchAd('inApp')">
-                <div class="ad-title">In-App Interstitial</div>
+                <div class="ad-title">In-App Interstitial Ad</div>
                 <div class="ad-description">Watch an in-app ad and earn 20 points</div>
                 <button class="btn">Watch Ad</button>
             </div>
-            
             <div class="loader" id="ad-loader"></div>
-            
             <div class="ad-status">
                 <p id="ads-today">Ads watched today: 0/50</p>
                 <p id="next-ad">Next ad available: Now</p>
@@ -339,25 +119,21 @@
         <div id="withdraw" class="section">
             <h2>Withdraw Your Earnings</h2>
             <p class="info-text">Minimum withdrawal: 10,000 points</p>
-            
             <div class="stats">
                 <div class="stat-box">
                     <div class="stat-value" id="withdraw-points">0</div>
                     <div class="stat-label">Your Points</div>
                 </div>
             </div>
-            
             <div class="withdraw-form">
                 <div class="form-group">
                     <label for="wallet-address">Binance ERC20 Wallet Address</label>
                     <input type="text" id="wallet-address" placeholder="Enter your wallet address">
                 </div>
-                
                 <div class="form-group">
                     <label for="withdraw-amount">Amount to Withdraw (Points)</label>
                     <input type="number" id="withdraw-amount" placeholder="Min 10,000 points">
                 </div>
-                
                 <button class="btn" onclick="requestWithdrawal()">Request Withdrawal</button>
             </div>
         </div>
@@ -372,8 +148,7 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.enableClosingConfirmation();
-        
-        // User data
+
         let userData = {
             points: 0,
             adsWatched: 0,
@@ -386,24 +161,132 @@
             walletAddress: "",
             withdrawals: []
         };
-        
-        // Initialize the app
+
         function initApp() {
-            // Load user data from local storage
             const savedData = localStorage.getItem('userData');
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
-                // Keep the same user ID and name from Telegram
                 const { userId, userName, ...rest } = parsedData;
                 userData = { ...userData, ...rest };
             }
-            
-            // Generate referral code if not exists
-            if (!userData.referralCode) {
-                userData.referralCode = generateReferralCode();
+            if (!userData.referralCode) userData.referralCode = generateReferralCode();
+            updateUI();
+            updateAdAvailability();
+            checkForReferral();
+        }
+
+        function generateReferralCode() {
+            return 'REF' + userData.userId.toString().slice(-6) + Math.floor(Math.random() * 100).toString().padStart(2, '0');
+        }
+
+        function checkForReferral() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+            if (refCode && refCode !== userData.referralCode) {
+                const referralsGiven = JSON.parse(localStorage.getItem('referralsGiven') || '{}');
+                if (!referralsGiven[refCode]) {
+                    userData.points += 100;
+                    userData.referrals += 1;
+                    referralsGiven[refCode] = true;
+                    localStorage.setItem('referralsGiven', JSON.stringify(referralsGiven));
+                    saveUserData();
+                    alert('You received 100 points from a referral!');
+                    updateUI();
+                }
             }
-            
-            // Update UI with user data
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function watchAd(type) {
+            if (userData.adsToday >= 50) {
+                alert('You have reached the daily limit of 50 ads. Come back tomorrow!');
+                return;
+            }
+            const now = Date.now();
+            if (now - userData.lastAdTime < 30000) {
+                const timeLeft = Math.ceil((30000 - (now - userData.lastAdTime)) / 1000);
+                document.getElementById('next-ad').textContent = `Next ad available in: ${timeLeft}s`;
+                alert(`Please wait ${timeLeft} seconds before watching another ad.`);
+                return;
+            }
+
+            const loader = document.getElementById('ad-loader');
+            loader.style.display = 'block';
+            document.querySelectorAll('.btn').forEach(btn => btn.disabled = true);
+
+            let adCall;
+            if (type === 'interstitial') {
+                adCall = show_9242009().then(() => {
+                    rewardUser();
+                });
+            } else if (type === 'popup') {
+                adCall = show_9242009('pop').then(() => {
+                    rewardUser();
+                }).catch(e => {
+                    console.error("Popup ad error:", e);
+                });
+            } else if (type === 'inApp') {
+                adCall = show_9242009({
+                    type: 'inApp',
+                    inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false }
+                });
+                // In-App Interstitial प्रॉमिस नहीं लौटाता, इसलिए रिवॉर्ड नहीं
+            }
+
+            adCall.finally(() => {
+                loader.style.display = 'none';
+                document.querySelectorAll('.btn').forEach(btn => btn.disabled = false);
+            });
+        }
+
+        function rewardUser() {
+            userData.points += 20;
+            userData.adsWatched += 1;
+            userData.adsToday += 1;
+            userData.lastAdTime = Date.now();
+            updateUI();
+            startCountdown();
+            saveUserData();
+            alert('You earned 20 points!');
+        }
+
+        function startCountdown() {
+            const countdownElement = document.getElementById('countdown');
+            const nextAdElement = document.getElementById('next-ad');
+            countdownElement.style.display = 'block';
+            nextAdElement.style.display = 'none';
+            let timeLeft = 30;
+            const timer = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    countdownElement.style.display = 'none';
+                    nextAdElement.style.display = 'block';
+                    nextAdElement.textContent = 'Next ad available: Now';
+                    updateAdAvailability();
+                } else {
+                    countdownElement.textContent = `${timeLeft}s`;
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
+        function updateAdAvailability() {
+            const now = Date.now();
+            if (now - userData.lastAdTime < 30000) {
+                const timeLeft = Math.ceil((30000 - (now - userData.lastAdTime)) / 1000);
+                document.getElementById('next-ad').textContent = `Next ad available in: ${timeLeft}s`;
+            } else {
+                document.getElementById('next-ad').textContent = 'Next ad available: Now';
+            }
+        }
+
+        function updateUI() {
             document.getElementById('user-name').textContent = userData.userName;
             document.getElementById('user-id').textContent = `ID: ${userData.userId}`;
             document.getElementById('user-points').textContent = `${userData.points} Points`;
@@ -413,164 +296,34 @@
             document.getElementById('ref-code').textContent = userData.referralCode;
             document.getElementById('ads-today').textContent = `Ads watched today: ${userData.adsToday}/50`;
             document.getElementById('withdraw-points').textContent = userData.points;
-            
-            // Check if user can watch ads
-            updateAdAvailability();
-            
-            // Check for referral parameter in URL
-            checkForReferral();
         }
-        
-        // Generate a referral code
-        function generateReferralCode() {
-            return 'REF' + userData.userId.toString().slice(-6) + Math.floor(Math.random() * 100).toString().padStart(2, '0');
+
+        function saveUserData() {
+            localStorage.setItem('userData', JSON.stringify(userData));
         }
-        
-        // Check for referral parameter in URL
-        function checkForReferral() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const refCode = urlParams.get('ref');
-            
-            if (refCode && refCode !== userData.referralCode) {
-                // Add referral points if not already referred by this user
-                const referralsGiven = JSON.parse(localStorage.getItem('referralsGiven') || '{}');
-                if (!referralsGiven[refCode]) {
-                    userData.points += 100;
-                    userData.referrals += 1;
-                    referralsGiven[refCode] = true;
-                    localStorage.setItem('referralsGiven', JSON.stringify(referralsGiven));
-                    saveUserData();
-                    
-                    alert('You received 100 points from a referral!');
-                    initApp();
-                }
-            }
-        }
-        
-        // Show a specific section
-        function showSection(sectionId) {
-            // Hide all sections
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Remove active class from all buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show the selected section
-            document.getElementById(sectionId).classList.add('active');
-            
-            // Activate the clicked button
-            event.target.classList.add('active');
-        }
-        
-        // Watch an ad
-        function watchAd(type) {
-            // Check if user has reached daily limit
-            if (userData.adsToday >= 50) {
-                alert('You have reached the daily limit of 50 ads. Come back tomorrow!');
+
+        function requestWithdrawal() {
+            const walletAddress = document.getElementById('wallet-address').value;
+            const withdrawAmount = parseInt(document.getElementById('withdraw-amount').value);
+            if (!walletAddress || withdrawAmount < 10000) {
+                alert('Please enter a valid wallet address and minimum 10,000 points.');
                 return;
             }
-            
-            // Check if enough time has passed since last ad
-            const now = Date.now();
-            const timeSinceLastAd = now - userData.lastAdTime;
-            if (timeSinceLastAd < 30000) { // 30 seconds
-                const timeLeft = Math.ceil((30000 - timeSinceLastAd) / 1000);
-                document.getElementById('next-ad').textContent = `Next ad available in: ${timeLeft}s`;
-                alert(`Please wait ${timeLeft} seconds before watching another ad.`);
+            if (withdrawAmount > userData.points) {
+                alert('You don\'t have enough points to withdraw.');
                 return;
             }
-            
-            // Show loader
-            const loader = document.getElementById('ad-loader');
-            loader.style.display = 'block';
-            
-            // Disable buttons during ad loading
-            document.querySelectorAll('.btn').forEach(btn => {
-                btn.disabled = true;
-            });
-            
-            // Show the ad based on type
-            if (type === 'interstitial') {
-                show_9242009().then(() => {
-                    // Reward user after watching the ad
-                    rewardUser();
-                }).catch(e => {
-                    console.error("Ad error: ", e);
-                    alert("Failed to load ad. Please try again.");
-                }).finally(() => {
-                    loader.style.display = 'none';
-                    document.querySelectorAll('.btn').forEach(btn => {
-                        btn.disabled = false;
-                    });
-                });
-            } else if (type === 'popup') {
-                show_9242009('pop').then(() => {
-                    // Reward user after watching the ad
-                    rewardUser();
-                }).catch(e => {
-                    console.error("Ad error: ", e);
-                    alert("Failed to load ad. Please try again.");
-                }).finally(() => {
-                    loader.style.display = 'none';
-                    document.querySelectorAll('.btn').forEach(btn => {
-                        btn.disabled = false;
-                    });
-                });
-            } else if (type === 'inApp') {
-                show_9242009({
-                    type: 'inApp',
-                    inAppSettings: {
-                        frequency: 2,
-                        capping: 0.1,
-                        interval: 30,
-                        timeout: 5,
-                        everyPage: false
-                    }
-                }).then(() => {
-                    // Reward user after watching the ad
-                    rewardUser();
-                }).catch(e => {
-                    console.error("Ad error: ", e);
-                    alert("Failed to load ad. Please try again.");
-                }).finally(() => {
-                    loader.style.display = 'none';
-                    document.querySelectorAll('.btn').forEach(btn => {
-                        btn.disabled = false;
-                    });
-                });
-            }
-        }
-        
-        // Reward user for watching an ad
-        function rewardUser() {
-            userData.points += 20;
-            userData.adsWatched += 1;
-            userData.adsToday += 1;
-            userData.lastAdTime = Date.now();
-            
-            // Update UI
-            document.getElementById('user-points').textContent = `${userData.points} Points`;
-            document.getElementById('total-points').textContent = userData.points;
-            document.getElementById('ads-watched').textContent = userData.adsWatched;
-            document.getElementById('ads-today').textContent = `Ads watched today: ${userData.adsToday}/50`;
-            document.getElementById('withdraw-points').textContent = userData.points;
-            
-            // Start countdown
-            startCountdown();
-            
-            // Save user data
+            userData.points -= withdrawAmount;
+            userData.withdrawals.push({ amount: withdrawAmount, address: walletAddress, date: new Date().toISOString() });
             saveUserData();
-            
-            alert('You earned 20 points!');
+            updateUI();
+            alert('Withdrawal request submitted successfully!');
+            document.getElementById('wallet-address').value = '';
+            document.getElementById('withdraw-amount').value = '';
         }
-        
-        // Start countdown for next ad
-        function startCountdown() {
-            const countdownElement = document.getElementById('countdown');
-            const nextAdElement = document.getElementById('next-ad');
-            
-            countdownElement.style.display = 'blo
+
+        // Initialize the app
+        initApp();
+    </script>
+</body>
+    </html>
