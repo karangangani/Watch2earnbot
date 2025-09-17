@@ -234,7 +234,7 @@
                 return;
             }
             const now = Date.now();
-            if (now - userData.lastAdTime < 15000) { // Changed to 15 seconds
+            if (now - userData.lastAdTime < 15000) {
                 const timeLeft = Math.ceil((15000 - (now - userData.lastAdTime)) / 1000);
                 document.getElementById('next-ad').textContent = `Next ad available in: ${timeLeft}s`;
                 alert(`Please wait ${timeLeft} seconds before watching another ad.`);
@@ -285,7 +285,7 @@
             const nextAdElement = document.getElementById('next-ad');
             countdownElement.style.display = 'block';
             nextAdElement.style.display = 'none';
-            let timeLeft = 15; // Changed to 15 seconds
+            let timeLeft = 15;
             const timer = setInterval(() => {
                 if (timeLeft <= 0) {
                     clearInterval(timer);
@@ -302,7 +302,7 @@
 
         function updateAdAvailability() {
             const now = Date.now();
-            if (now - userData.lastAdTime < 15000) { // Changed to 15 seconds
+            if (now - userData.lastAdTime < 15000) {
                 const timeLeft = Math.ceil((15000 - (now - userData.lastAdTime)) / 1000);
                 document.getElementById('next-ad').textContent = `Next ad available in: ${timeLeft}s`;
             } else {
@@ -353,8 +353,16 @@
         }
 
         function shareReferral() {
-            const referralLink = `https://t.me/YourBotName?start=${userData.referralCode}`;
-            tg.openTelegramLink(referralLink); // Opens Telegram share dialog with contacts
+            // Show popup with user info
+            tg.showPopup({
+                title: 'Share Your Referral',
+                message: `Your ID: ${userData.userId}\nYour Name: ${userData.userName}\n\nJoin @Watch2earnbot for free crypto! Referral Code: ${userData.referralCode}`,
+                buttons: [{ type: 'ok', text: 'Share Now' }]
+            }, () => {
+                // On OK, open share dialog
+                const referralLink = `https://t.me/YourBotName?start=${userData.referralCode}`;
+                tg.openTelegramLink(referralLink);
+            });
             alert('Referral link shared with your Telegram contacts!');
         }
 
