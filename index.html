@@ -121,7 +121,7 @@
         
         <div id="withdraw" class="section">
             <h2>Withdraw Your Earnings</h2>
-            <p class="info-text">Minimum withdrawal: 10,000 🪙 = 5 USDT | Must complete 10 reviews</p>
+            <p class="info-text">Minimum withdrawal: 10,000 🪙 = 5 USDT | Must have 10 referrals</p>
             <div class="stats">
                 <div class="stat-box">
                     <div class="stat-value" id="withdraw-coins">0 🪙</div>
@@ -138,8 +138,8 @@
                     <input type="number" id="withdraw-amount" placeholder="Min 10,000 🪙">
                 </div>
                 <div class="form-group">
-                    <label for="reviews">Number of Reviews Completed</label>
-                    <input type="number" id="reviews" placeholder="Min 10 reviews">
+                    <label for="referrals">Number of Referrals</label>
+                    <input type="number" id="referrals" placeholder="Min 10 referrals">
                 </div>
                 <button class="btn" onclick="requestWithdrawal()">Request Withdrawal</button>
             </div>
@@ -329,7 +329,7 @@
         function requestWithdrawal() {
             const walletAddress = document.getElementById('wallet-address').value;
             const withdrawAmount = parseInt(document.getElementById('withdraw-amount').value);
-            const reviews = parseInt(document.getElementById('reviews').value);
+            const referrals = parseInt(document.getElementById('referrals').value);
             if (!walletAddress || withdrawAmount < 10000) {
                 alert('Please enter a valid wallet address and minimum 10,000 🪙.');
                 return;
@@ -338,24 +338,24 @@
                 alert('You don\'t have enough coins to withdraw.');
                 return;
             }
-            if (reviews < 10) {
-                alert('You must complete at least 10 reviews to withdraw.');
+            if (referrals < 10) {
+                alert('You must have at least 10 referrals to withdraw.');
                 return;
             }
             userData.coins -= withdrawAmount;
-            userData.withdrawals.push({ amount: withdrawAmount, address: walletAddress, date: new Date().toISOString(), reviews: reviews });
+            userData.withdrawals.push({ amount: withdrawAmount, address: walletAddress, date: new Date().toISOString(), referrals: referrals });
             saveUserData();
             updateUI();
             alert('Withdrawal request submitted successfully! You will receive 5 USDT for 10,000 🪙.');
             document.getElementById('wallet-address').value = '';
             document.getElementById('withdraw-amount').value = '';
-            document.getElementById('reviews').value = '';
+            document.getElementById('referrals').value = '';
         }
 
         function shareReferral() {
             const referralLink = `https://t.me/YourBotName?start=${userData.referralCode}`;
-            tg.openTelegramLink(referralLink);
-            alert('Referral link shared with your contacts!');
+            tg.openTelegramLink(referralLink); // Opens Telegram share dialog with contacts
+            alert('Referral link shared with your Telegram contacts!');
         }
 
         function joinChannel() {
@@ -367,4 +367,4 @@
         setInterval(checkReferralRewards, 60000); // Check every minute
     </script>
 </body>
-            </html>
+    </html>
