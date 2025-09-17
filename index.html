@@ -41,6 +41,7 @@
         .form-group input { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #333; background-color: #222; color: white; }
         .ad-status { text-align: center; margin: 15px 0; padding: 10px; background-color: #1a1a2a; border-radius: 10px; }
         .countdown { font-size: 18px; color: #0088cc; font-weight: bold; margin: 10px 0; }
+        .channel-btn { padding: 12px 25px; background-color: #0088cc; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -53,7 +54,7 @@
                     <div id="user-name">Loading...</div>
                     <div id="user-id">ID: Loading...</div>
                 </div>
-                <div id="user-points">0 Points</div>
+                <div id="user-coins">0 🪙</div>
             </div>
         </div>
         
@@ -67,8 +68,8 @@
             <h2>Your Dashboard</h2>
             <div class="stats">
                 <div class="stat-box">
-                    <div class="stat-value" id="total-points">0</div>
-                    <div class="stat-label">Total Points</div>
+                    <div class="stat-value" id="total-coins">0 🪙</div>
+                    <div class="stat-label">Total Coins</div>
                 </div>
                 <div class="stat-box">
                     <div class="stat-value" id="ads-watched">0</div>
@@ -82,47 +83,49 @@
             <div class="referral-section">
                 <h3>Your Referral Code</h3>
                 <div class="referral-code" id="ref-code">Loading...</div>
-                <p>Share this code with friends to earn 100 points for each referral!</p>
+                <button class="btn" onclick="shareReferral()">Share Referral</button>
+                <p>Share this code with friends to earn 100 coins after 1 hour!</p>
             </div>
             <div class="info-text">
                 <p>🎯 Daily Limit: 50 ads per day</p>
-                <p>💰 Each ad gives you 20 points</p>
+                <p>💰 Each ad gives you 20 🪙</p>
             </div>
+            <button class="channel-btn" onclick="joinChannel()">Join Official Channel</button>
         </div>
         
         <div id="ads" class="section">
-            <h2>Watch Ads & Earn Points</h2>
-            <p class="info-text">Click on an ad to watch and earn 20 points. Daily limit: 50 ads.</p>
+            <h2>Watch Ads & Earn Coins</h2>
+            <p class="info-text">Click on an ad to watch and earn 20 🪙. Daily limit: 50 ads.</p>
             <div class="ad-container" onclick="watchAd('interstitial')">
                 <div class="ad-title">Rewarded Interstitial Ad</div>
-                <div class="ad-description">Watch a full-screen ad and earn 20 points</div>
+                <div class="ad-description">Watch a full-screen ad and earn 20 🪙</div>
                 <button class="btn">Watch Ad</button>
             </div>
             <div class="ad-container" onclick="watchAd('popup')">
                 <div class="ad-title">Rewarded Popup Ad</div>
-                <div class="ad-description">Watch a popup ad and earn 20 points</div>
+                <div class="ad-description">Watch a popup ad and earn 20 🪙</div>
                 <button class="btn">Watch Ad</button>
             </div>
             <div class="ad-container" onclick="watchAd('inApp')">
                 <div class="ad-title">In-App Interstitial Ad</div>
-                <div class="ad-description">Watch an in-app ad and earn 20 points</div>
+                <div class="ad-description">Watch an in-app ad and earn 20 🪙</div>
                 <button class="btn">Watch Ad</button>
             </div>
             <div class="loader" id="ad-loader"></div>
             <div class="ad-status">
                 <p id="ads-today">Ads watched today: 0/50</p>
                 <p id="next-ad">Next ad available: Now</p>
-                <div class="countdown" id="countdown" style="display: none;">30s</div>
+                <div class="countdown" id="countdown" style="display: none;">15s</div>
             </div>
         </div>
         
         <div id="withdraw" class="section">
             <h2>Withdraw Your Earnings</h2>
-            <p class="info-text">Minimum withdrawal: 10,000 points</p>
+            <p class="info-text">Minimum withdrawal: 10,000 🪙 = 5 USDT | Must complete 10 reviews</p>
             <div class="stats">
                 <div class="stat-box">
-                    <div class="stat-value" id="withdraw-points">0</div>
-                    <div class="stat-label">Your Points</div>
+                    <div class="stat-value" id="withdraw-coins">0 🪙</div>
+                    <div class="stat-label">Your Coins</div>
                 </div>
             </div>
             <div class="withdraw-form">
@@ -131,8 +134,12 @@
                     <input type="text" id="wallet-address" placeholder="Enter your wallet address">
                 </div>
                 <div class="form-group">
-                    <label for="withdraw-amount">Amount to Withdraw (Points)</label>
-                    <input type="number" id="withdraw-amount" placeholder="Min 10,000 points">
+                    <label for="withdraw-amount">Amount to Withdraw (Coins)</label>
+                    <input type="number" id="withdraw-amount" placeholder="Min 10,000 🪙">
+                </div>
+                <div class="form-group">
+                    <label for="reviews">Number of Reviews Completed</label>
+                    <input type="number" id="reviews" placeholder="Min 10 reviews">
                 </div>
                 <button class="btn" onclick="requestWithdrawal()">Request Withdrawal</button>
             </div>
@@ -150,7 +157,7 @@
         tg.enableClosingConfirmation();
 
         let userData = {
-            points: 0,
+            coins: 0,
             adsWatched: 0,
             adsToday: 0,
             lastAdTime: 0,
@@ -159,7 +166,8 @@
             userId: tg.initDataUnsafe.user?.id || Math.floor(Math.random() * 1000000),
             userName: tg.initDataUnsafe.user?.first_name || "Telegram User",
             walletAddress: "",
-            withdrawals: []
+            withdrawals: [],
+            referralRewardsPending: {} // Store pending referral rewards with timestamps
         };
 
         function initApp() {
@@ -172,6 +180,7 @@
             if (!userData.referralCode) userData.referralCode = generateReferralCode();
             updateUI();
             updateAdAvailability();
+            checkReferralRewards();
             checkForReferral();
         }
 
@@ -185,13 +194,29 @@
             if (refCode && refCode !== userData.referralCode) {
                 const referralsGiven = JSON.parse(localStorage.getItem('referralsGiven') || '{}');
                 if (!referralsGiven[refCode]) {
-                    userData.points += 100;
-                    userData.referrals += 1;
-                    referralsGiven[refCode] = true;
+                    referralsGiven[refCode] = { timestamp: Date.now() };
                     localStorage.setItem('referralsGiven', JSON.stringify(referralsGiven));
+                    userData.referrals += 1;
                     saveUserData();
-                    alert('You received 100 points from a referral!');
-                    updateUI();
+                    alert('Referral recorded! You will earn 100 🪙 after 1 hour.');
+                }
+            }
+        }
+
+        function checkReferralRewards() {
+            const referralsGiven = JSON.parse(localStorage.getItem('referralsGiven') || '{}');
+            for (let refCode in referralsGiven) {
+                if (!userData.referralRewardsPending[refCode]) {
+                    const timestamp = referralsGiven[refCode].timestamp;
+                    if (Date.now() - timestamp >= 3600000) { // 1 hour = 3600000 ms
+                        userData.coins += 100;
+                        userData.referralRewardsPending[refCode] = true;
+                        delete referralsGiven[refCode];
+                        localStorage.setItem('referralsGiven', JSON.stringify(referralsGiven));
+                        saveUserData();
+                        alert('You earned 100 🪙 from a referral!');
+                        updateUI();
+                    }
                 }
             }
         }
@@ -209,8 +234,8 @@
                 return;
             }
             const now = Date.now();
-            if (now - userData.lastAdTime < 30000) {
-                const timeLeft = Math.ceil((30000 - (now - userData.lastAdTime)) / 1000);
+            if (now - userData.lastAdTime < 15000) { // Changed to 15 seconds
+                const timeLeft = Math.ceil((15000 - (now - userData.lastAdTime)) / 1000);
                 document.getElementById('next-ad').textContent = `Next ad available in: ${timeLeft}s`;
                 alert(`Please wait ${timeLeft} seconds before watching another ad.`);
                 return;
@@ -236,7 +261,6 @@
                     type: 'inApp',
                     inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false }
                 });
-                // In-App Interstitial प्रॉमिस नहीं लौटाता, इसलिए रिवॉर्ड नहीं
             }
 
             adCall.finally(() => {
@@ -246,14 +270,14 @@
         }
 
         function rewardUser() {
-            userData.points += 20;
+            userData.coins += 20;
             userData.adsWatched += 1;
             userData.adsToday += 1;
             userData.lastAdTime = Date.now();
             updateUI();
             startCountdown();
             saveUserData();
-            alert('You earned 20 points!');
+            alert('You earned 20 🪙!');
         }
 
         function startCountdown() {
@@ -261,7 +285,7 @@
             const nextAdElement = document.getElementById('next-ad');
             countdownElement.style.display = 'block';
             nextAdElement.style.display = 'none';
-            let timeLeft = 30;
+            let timeLeft = 15; // Changed to 15 seconds
             const timer = setInterval(() => {
                 if (timeLeft <= 0) {
                     clearInterval(timer);
@@ -278,8 +302,8 @@
 
         function updateAdAvailability() {
             const now = Date.now();
-            if (now - userData.lastAdTime < 30000) {
-                const timeLeft = Math.ceil((30000 - (now - userData.lastAdTime)) / 1000);
+            if (now - userData.lastAdTime < 15000) { // Changed to 15 seconds
+                const timeLeft = Math.ceil((15000 - (now - userData.lastAdTime)) / 1000);
                 document.getElementById('next-ad').textContent = `Next ad available in: ${timeLeft}s`;
             } else {
                 document.getElementById('next-ad').textContent = 'Next ad available: Now';
@@ -289,13 +313,13 @@
         function updateUI() {
             document.getElementById('user-name').textContent = userData.userName;
             document.getElementById('user-id').textContent = `ID: ${userData.userId}`;
-            document.getElementById('user-points').textContent = `${userData.points} Points`;
-            document.getElementById('total-points').textContent = userData.points;
+            document.getElementById('user-coins').textContent = `${userData.coins} 🪙`;
+            document.getElementById('total-coins').textContent = `${userData.coins} 🪙`;
             document.getElementById('ads-watched').textContent = userData.adsWatched;
             document.getElementById('ref-count').textContent = userData.referrals;
             document.getElementById('ref-code').textContent = userData.referralCode;
             document.getElementById('ads-today').textContent = `Ads watched today: ${userData.adsToday}/50`;
-            document.getElementById('withdraw-points').textContent = userData.points;
+            document.getElementById('withdraw-coins').textContent = `${userData.coins} 🪙`;
         }
 
         function saveUserData() {
@@ -305,25 +329,42 @@
         function requestWithdrawal() {
             const walletAddress = document.getElementById('wallet-address').value;
             const withdrawAmount = parseInt(document.getElementById('withdraw-amount').value);
+            const reviews = parseInt(document.getElementById('reviews').value);
             if (!walletAddress || withdrawAmount < 10000) {
-                alert('Please enter a valid wallet address and minimum 10,000 points.');
+                alert('Please enter a valid wallet address and minimum 10,000 🪙.');
                 return;
             }
-            if (withdrawAmount > userData.points) {
-                alert('You don\'t have enough points to withdraw.');
+            if (withdrawAmount > userData.coins) {
+                alert('You don\'t have enough coins to withdraw.');
                 return;
             }
-            userData.points -= withdrawAmount;
-            userData.withdrawals.push({ amount: withdrawAmount, address: walletAddress, date: new Date().toISOString() });
+            if (reviews < 10) {
+                alert('You must complete at least 10 reviews to withdraw.');
+                return;
+            }
+            userData.coins -= withdrawAmount;
+            userData.withdrawals.push({ amount: withdrawAmount, address: walletAddress, date: new Date().toISOString(), reviews: reviews });
             saveUserData();
             updateUI();
-            alert('Withdrawal request submitted successfully!');
+            alert('Withdrawal request submitted successfully! You will receive 5 USDT for 10,000 🪙.');
             document.getElementById('wallet-address').value = '';
             document.getElementById('withdraw-amount').value = '';
+            document.getElementById('reviews').value = '';
+        }
+
+        function shareReferral() {
+            const referralLink = `https://t.me/YourBotName?start=${userData.referralCode}`;
+            tg.openTelegramLink(referralLink);
+            alert('Referral link shared with your contacts!');
+        }
+
+        function joinChannel() {
+            window.open('https://t.me/earncryptofree24', '_blank');
         }
 
         // Initialize the app
         initApp();
+        setInterval(checkReferralRewards, 60000); // Check every minute
     </script>
 </body>
-    </html>
+            </html>
