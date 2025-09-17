@@ -83,9 +83,9 @@
             <div class="referral-section">
                 <h3>Your Referral Code</h3>
                 <div class="referral-code" id="ref-code">Loading...</div>
-                <button class="btn" onclick="shareReferral()">Share Referral</button>
                 <button class="btn" id="copyReferral">Copy Referral</button>
-                <p>Share this code with friends to earn 100 coins after 1 hour!</p>
+                <p id="ref-status"></p>
+                <p>Copy this code with friends to earn 100 coins after 1 hour! <br> Every time you copy referral, use only this, otherwise you won't get coins.</p>
             </div>
             <div class="info-text">
                 <p>🎯 Daily Limit: 100 ads per day</p>
@@ -96,7 +96,7 @@
         
         <div id="ads" class="section">
             <h2>Watch Ads & Earn Coins</h2>
-            <p class="info-text">Click on an ad to watch and earn 20 🪙. Daily limit: 100 ads (resets after 12h).</p>
+            <p class="info-text">Click on an ad to watch and earn 20 🪙. After 20 ads, refer 2 friends to unlock all ads.</p>
             <div class="ad-container" onclick="watchAd('interstitial')">
                 <div class="ad-title">Rewarded Interstitial Ad</div>
                 <div class="ad-description">Watch a full-screen ad and earn 20 🪙</div>
@@ -117,12 +117,13 @@
                 <p id="ads-today">Ads watched today: 0/100</p>
                 <p id="next-ad">Next ad available: Now</p>
                 <div class="countdown" id="countdown" style="display: none;">15s</div>
+                <p id="ad-lock-status"></p>
             </div>
         </div>
         
         <div id="withdraw" class="section">
             <h2>Withdraw Your Earnings</h2>
-            <p class="info-text">Minimum withdrawal: 10,000 🪙 = 5 USDT | Must have 10 referrals</p>
+            <p class="info-text">Minimum withdrawal: 50,000 🪙 = 25 USDT | Must have 20 referrals</p>
             <div class="stats">
                 <div class="stat-box">
                     <div class="stat-value" id="withdraw-coins">0 🪙</div>
@@ -136,20 +137,21 @@
                 </div>
                 <div class="form-group">
                     <label for="withdraw-amount">Amount to Withdraw (Coins)</label>
-                    <input type="number" id="withdraw-amount" placeholder="Min 10,000 🪙">
+                    <input type="number" id="withdraw-amount" placeholder="Min 50,000 🪙">
                 </div>
                 <div class="form-group">
                     <label for="referrals">Number of Referrals</label>
-                    <input type="number" id="referrals" placeholder="Min 10 referrals">
+                    <input type="number" id="referrals" placeholder="Min 20 referrals">
                 </div>
                 <button class="btn" onclick="requestWithdrawal()">Request Withdrawal</button>
+                <button class="btn" onclick="makeBinanceAccount()" style="margin-top: 10px;">Make account on Binance</button>
             </div>
         </div>
-        
-        <div class="footer">
+         <div class="footer">
             <p>Earn With Telegram Mini App © 2023</p>
         </div>
     </div>
+
     <script>
         // Initialize Telegram WebApp
         let tg = window.Telegram.WebApp;
@@ -168,7 +170,8 @@
             userName: tg.initDataUnsafe.user?.first_name || "Telegram User",
             walletAddress: "",
             withdrawals: [],
-            referralRewardsPending: {} // Store pending referral rewards with timestamps
+            referralRewardsPending: {}, // Store pending referral rewards with timestamps
+            lastCopyTime: 0 // Track last copy time for 30-min cooldown
         };
 
         function initApp() {
@@ -179,11 +182,11 @@
                 userData = { ...userData, ...rest };
             }
             if (!userData.referralCode) userData.referralCode = generateReferralCode();
-            checkAdReset(); // Check if 12h has passed
+            checkAdReset();
             updateUI();
             updateAdAvailability();
             checkReferralRewards();
-            checkReferralCopyRewards(); // Check for copied referral rewards
+            checkReferralCopyRewards();
             checkForReferral();
         }
 
@@ -217,8 +220,8 @@
                         delete referralsGiven[refCode];
                         localStorage.setItem('referralsGiven', JSON.stringify(referralsGiven));
                         saveUserData();
-                        alert('You earned 100 🪙 from a referral!');
                         updateUI();
+                        alert('You earned 100 🪙 from a referral!');
                     }
                 }
             }
@@ -239,11 +242,17 @@
                     alert(`You have reached the daily limit of 100 ads. Please wait ${hoursLeft} hours to watch again.`);
                     return;
                 } else {
-                    userData.adsToday = 0; // Reset if 12h passed
+                    userData.adsToday = 0;
                     userData.lastAdResetTime = Date.now();
                     saveUserData();
                 }
             }
+            if (userData.adsWatched >= 20 && userData.referrals < 2) {
+                document.getElementById('ad-lock-status').textContent = 'Refer 2 friends to unlock all ads!';
+                alert('You need to refer 2 friends to unlock more ads after 20 ads.');
+                return;
+            }
+
             const now = Date.now();
             if (now - userData.lastAdTime < 15000) {
                 const timeLeft = Math.ceil((15000 - (now - userData.lastAdTime)) / 1000);
@@ -277,7 +286,6 @@
                     alert('Ad failed to load. Please try again later.');
                 });
             }
-
             adCall.finally(() => {
                 loader.style.display = 'none';
                 document.querySelectorAll('.btn').forEach(btn => btn.disabled = false);
@@ -290,7 +298,7 @@
             userData.adsToday += 1;
             userData.lastAdTime = Date.now();
             if (userData.adsToday >= 100) {
-                userData.lastAdResetTime = Date.now(); // Set reset time when limit reached
+                userData.lastAdResetTime = Date.now();
             }
             updateUI();
             startCountdown();
@@ -320,12 +328,12 @@
         function updateAdAvailability() {
             const now = Date.now();
             if (userData.adsToday >= 100) {
-                const timeLeft = Math.max(0, 43200000 - (now - userData.lastAdResetTime)); // 12h = 43200000 ms
+                const timeLeft = Math.max(0, 43200000 - (now - userData.lastAdResetTime));
                 if (timeLeft > 0) {
                     const hoursLeft = Math.ceil(timeLeft / 3600000);
                     document.getElementById('next-ad').textContent = `Next ads available in: ${hoursLeft} hours`;
                 } else {
-                    userData.adsToday = 0; // Reset adsToday
+                    userData.adsToday = 0;
                     userData.lastAdResetTime = now;
                     saveUserData();
                     document.getElementById('next-ad').textContent = 'Next ads available: Now';
@@ -336,11 +344,16 @@
             } else {
                 document.getElementById('next-ad').textContent = 'Next ad available: Now';
             }
+            if (userData.adsWatched >= 20 && userData.referrals < 2) {
+                document.getElementById('ad-lock-status').textContent = 'Refer 2 friends to unlock all ads!';
+            } else {
+                document.getElementById('ad-lock-status').textContent = '';
+            }
         }
 
         function checkAdReset() {
             const now = Date.now();
-            if (userData.adsToday >= 100 && now - userData.lastAdResetTime >= 43200000) { // 12h
+            if (userData.adsToday >= 100 && now - userData.lastAdResetTime >= 43200000) {
                 userData.adsToday = 0;
                 userData.lastAdResetTime = now;
                 saveUserData();
@@ -357,62 +370,59 @@
             document.getElementById('ref-code').textContent = userData.referralCode;
             document.getElementById('ads-today').textContent = `Ads watched today: ${userData.adsToday}/100`;
             document.getElementById('withdraw-coins').textContent = `${userData.coins} 🪙`;
+            document.getElementById('ref-status').textContent = userData.referrals >= 2 ? `2 referrals completed!` : '';
         }
 
         function saveUserData() {
             localStorage.setItem('userData', JSON.stringify(userData));
         }
 
-        function requestWithdrawal() {
+                function requestWithdrawal() {
             const walletAddress = document.getElementById('wallet-address').value;
             const withdrawAmount = parseInt(document.getElementById('withdraw-amount').value);
             const referrals = parseInt(document.getElementById('referrals').value);
-            if (!walletAddress || withdrawAmount < 10000) {
-                alert('Please enter a valid wallet address and minimum 10,000 🪙.');
+            if (!walletAddress || withdrawAmount < 50000) {
+                alert('Please enter a valid wallet address and minimum 50,000 🪙.');
                 return;
             }
             if (withdrawAmount > userData.coins) {
                 alert('You don\'t have enough coins to withdraw.');
                 return;
             }
-            if (referrals < 10) {
-                alert('You must have at least 10 referrals to withdraw.');
+            if (referrals < 20) {
+                alert('You must have at least 20 referrals to withdraw.');
                 return;
             }
             userData.coins -= withdrawAmount;
-            userData
-                        saveUserData();
+            userData.withdrawals.push({ amount: withdrawAmount, address: walletAddress, date: new Date().toISOString(), referrals: referrals });
+            saveUserData();
             updateUI();
-            alert('Withdrawal request submitted successfully! You will receive 5 USDT for 10,000 🪙.');
+            alert('Withdrawal request submitted successfully! You will receive 25 USDT for 50,000 🪙.');
             document.getElementById('wallet-address').value = '';
             document.getElementById('withdraw-amount').value = '';
             document.getElementById('referrals').value = '';
         }
 
-        function shareReferral() {
-            const referralMessage = `Your Telegram ID: ${userData.userId}\nJoin free crypto earning with @Wach2earnbot join this! Referral Code: ${userData.referralCode}`;
-            tg.showPopup({
-                title: 'Share Your Referral',
-                message: referralMessage,
-                buttons: [
-                    { type: 'cancel', text: 'Share' }
-                ]
-            }, () => {
-                const referralLink = `https://t.me/Y@Wach2earnbot?start=${userData.referralCode}`; // Replace YourBotName with actual bot username
-                tg.openTelegramLink(referralLink);
-                alert('Referral link shared with your Telegram contacts!');
-            });
+        function makeBinanceAccount() {
+            window.open('https://www.binance.com/referral/earn-together/refer-in-hotsummer/claim?hl=en&ref=GRO_20338_0CPVP&utm_source=default', '_blank');
         }
 
         document.getElementById('copyReferral').addEventListener('click', function() {
-            const referralMessage = `Your Telegram ID: ${userData.userId}\nJoin free crypto earning with @Wach2earnbot join this! Referral Code: ${userData.referralCode}`;
+            const now = Date.now();
+            if (now - userData.lastCopyTime < 1800000) { // 30 minutes = 1800000 ms
+                const timeLeft = Math.ceil((1800000 - (now - userData.lastCopyTime)) / 60000);
+                alert(`Please wait ${timeLeft} minutes before copying again.`);
+                return;
+            }
+
+            const referralMessage = `Your Telegram ID: ${userData.userId}\nJoin free crypto earning with @Wach2earnbot! Referral Code: ${userData.referralCode} https://t.me/Wach2earnbot`;
             navigator.clipboard.writeText(referralMessage).then(() => {
-                alert('Referral message copied to clipboard!');
-                // Record the copy event with timestamp
+                alert('Referral message copied to clipboard! Use only this to get coins.');
+                userData.lastCopyTime = now;
                 const referralsCopied = JSON.parse(localStorage.getItem('referralsCopied') || '{}');
-                referralsCopied[userData.referralCode] = { timestamp: Date.now() };
+                referralsCopied[userData.referralCode] = { timestamp: now };
                 localStorage.setItem('referralsCopied', JSON.stringify(referralsCopied));
-                checkReferralCopyRewards(); // Check for rewards immediately
+                checkReferralCopyRewards();
             }).catch(() => {
                 alert('Failed to copy. Please try again.');
             });
@@ -424,11 +434,30 @@
                 const timestamp = referralsCopied[refCode].timestamp;
                 if (Date.now() - timestamp >= 3600000) { // 1 hour = 3600000 ms
                     userData.coins += 100;
+                    userData.referrals += 2; // Add 2 referrals now
                     delete referralsCopied[refCode];
                     localStorage.setItem('referralsCopied', JSON.stringify(referralsCopied));
                     saveUserData();
                     updateUI();
-                    alert('You earned 100 🪙 for copying and sharing your referral!');
+                    alert('You earned 100 🪙 and 2 referrals for copying your referral!');
+                }
+            }
+        }
+
+        function checkReferralRewards() {
+            const referralsGiven = JSON.parse(localStorage.getItem('referralsGiven') || '{}');
+            for (let refCode in referralsGiven) {
+                if (!userData.referralRewardsPending[refCode]) {
+                    const timestamp = referralsGiven[refCode].timestamp;
+                    if (Date.now() - timestamp >= 3600000) { // 1 hour = 3600000 ms
+                        userData.coins += 100;
+                        userData.referralRewardsPending[refCode] = true;
+                        delete referralsGiven[refCode];
+                        localStorage.setItem('referralsGiven', JSON.stringify(referralsGiven));
+                        saveUserData();
+                        updateUI();
+                        alert('You earned 100 🪙 from a referral!');
+                    }
                 }
             }
         }
