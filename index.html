@@ -83,8 +83,9 @@
             <div class="referral-section">
                 <h3>Your Referral Code</h3>
                 <div class="referral-code" id="ref-code">Loading...</div>
+                <button class="btn" onclick="shareReferral()">Share Referral</button>
                 <button class="btn" id="copyReferral">Copy Referral</button>
-                <p>Copy this code with friends to earn 100 coins after 1 hour!</p>
+                <p>Share this code with friends to earn 100 coins after 1 hour!</p>
             </div>
             <div class="info-text">
                 <p>🎯 Daily Limit: 100 ads per day</p>
@@ -92,7 +93,8 @@
             </div>
             <button class="channel-btn" onclick="joinChannel()">Join Official Channel</button>
         </div>
-           <div id="ads" class="section">
+        
+        <div id="ads" class="section">
             <h2>Watch Ads & Earn Coins</h2>
             <p class="info-text">Click on an ad to watch and earn 20 🪙. Daily limit: 100 ads (resets after 12h).</p>
             <div class="ad-container" onclick="watchAd('interstitial')">
@@ -148,7 +150,6 @@
             <p>Earn With Telegram Mini App © 2023</p>
         </div>
     </div>
-
     <script>
         // Initialize Telegram WebApp
         let tg = window.Telegram.WebApp;
@@ -216,8 +217,8 @@
                         delete referralsGiven[refCode];
                         localStorage.setItem('referralsGiven', JSON.stringify(referralsGiven));
                         saveUserData();
-                        updateUI();
                         alert('You earned 100 🪙 from a referral!');
+                        updateUI();
                     }
                 }
             }
@@ -379,13 +380,28 @@
                 return;
             }
             userData.coins -= withdrawAmount;
-            userData.withdrawals.push({ amount: withdrawAmount, address: walletAddress, date: new Date().toISOSt
+            userData
                         saveUserData();
             updateUI();
             alert('Withdrawal request submitted successfully! You will receive 5 USDT for 10,000 🪙.');
             document.getElementById('wallet-address').value = '';
             document.getElementById('withdraw-amount').value = '';
             document.getElementById('referrals').value = '';
+        }
+
+        function shareReferral() {
+            const referralMessage = `Your Telegram ID: ${userData.userId}\nJoin free crypto earning with @Wach2earnbot join this! Referral Code: ${userData.referralCode}`;
+            tg.showPopup({
+                title: 'Share Your Referral',
+                message: referralMessage,
+                buttons: [
+                    { type: 'cancel', text: 'Share' }
+                ]
+            }, () => {
+                const referralLink = `https://t.me/Y@Wach2earnbot?start=${userData.referralCode}`; // Replace YourBotName with actual bot username
+                tg.openTelegramLink(referralLink);
+                alert('Referral link shared with your Telegram contacts!');
+            });
         }
 
         document.getElementById('copyReferral').addEventListener('click', function() {
@@ -408,34 +424,16 @@
                 const timestamp = referralsCopied[refCode].timestamp;
                 if (Date.now() - timestamp >= 3600000) { // 1 hour = 3600000 ms
                     userData.coins += 100;
-                    userData.referrals += 1; // Add 1 referral count
                     delete referralsCopied[refCode];
                     localStorage.setItem('referralsCopied', JSON.stringify(referralsCopied));
                     saveUserData();
                     updateUI();
-                    alert('You earned 100 🪙 and 1 referral for copying and sharing your referral!');
+                    alert('You earned 100 🪙 for copying and sharing your referral!');
                 }
             }
         }
 
-        function checkReferralRewards() {
-            const referralsGiven = JSON.parse(localStorage.getItem('referralsGiven') || '{}');
-            for (let refCode in referralsGiven) {
-                if (!userData.referralRewardsPending[refCode]) {
-                    const timestamp = referralsGiven[refCode].timestamp;
-                    if (Date.now() - timestamp >= 3600000) { // 1 hour = 3600000 ms
-                        userData.coins += 100;
-                        userData.referralRewardsPending[refCode] = true;
-                        delete referralsGiven[refCode];
-                        localStorage.setItem('referralsGiven', JSON.stringify(referralsGiven));
-                        saveUserData();
-                        updateUI();
-                        alert('You earned 100 🪙 from a referral!');
-                    }
-                }
-            }
-        }
-function joinChannel() {
+        function joinChannel() {
             window.open('https://t.me/kxearnig', '_blank');
         }
 
@@ -446,4 +444,5 @@ function joinChannel() {
         setInterval(checkAdReset, 60000); // Check ad reset every minute
     </script>
 </body>
-</html>   
+</html>
+            
