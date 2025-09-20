@@ -8,40 +8,42 @@
     <script src='//libtl.com/sdk.js' data-zone='9242009' data-sdk='show_9242009'></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0a0a1a; color: #fff; padding: 16px; max-width: 100%; overflow-x: hidden; background-image: radial-gradient(circle at 10% 20%, rgba(0, 136, 204, 0.1) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(0, 136, 204, 0.1) 0%, transparent 20%); }
+        body { background-color: #0a0a1a; color: #fff; padding: 16px; max-width: 100%; overflow-x: hidden; background-image: radial-gradient(circle at 10% 20%, rgba(0, 255, 204, 0.1) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(0, 255, 204, 0.1) 0%, transparent 20%); }
         .container { max-width: 500px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #0088cc, #005599); border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4); }
-        .header h1 { font-size: 24px; margin-bottom: 5px; }
-        .user-info { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px; background-color: rgba(0, 0, 0, 0.3); border-radius: 10px; }
-        .nav { display: flex; justify-content: space-around; margin: 20px 0; padding: 12px; background-color: #111; border-radius: 15px; }
-        .nav-btn { padding: 12px 20px; background-color: #0088cc; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
-        .nav-btn.active { background-color: #006699; box-shadow: 0 0 15px rgba(0, 136, 204, 0.5); }
-        .section { display: none; padding: 20px; background-color: #111; border-radius: 15px; margin-bottom: 20px; min-height: 300px; }
+        .header { text-align: center; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #00cccc, #006666); border-radius: 15px; box-shadow: 0 6px 20px rgba(0, 255, 204, 0.5); }
+        .header h1 { font-size: 28px; margin-bottom: 8px; color: #fff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); }
+        .user-info { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px; background-color: rgba(0, 0, 0, 0.4); border-radius: 10px; border: 1px solid #00cccc; }
+        .user-info div { font-size: 16px; }
+        .nav { display: flex; justify-content: space-around; margin: 20px 0; padding: 12px; background-color: #1a1a2a; border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 255, 204, 0.2); }
+        .nav-btn { padding: 12px 20px; background-color: #00cccc; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .nav-btn.active { background-color: #006666; box-shadow: 0 0 15px rgba(0, 255, 204, 0.5); }
+        .section { display: none; padding: 20px; background-color: #1a1a2a; border-radius: 15px; margin-bottom: 20px; min-height: 300px; border: 1px solid #00cccc; }
         .section.active { display: block; }
         .stats { display: flex; justify-content: space-between; margin: 20px 0; }
-        .stat-box { background-color: #1a1a2a; padding: 15px; border-radius: 10px; text-align: center; flex: 1; margin: 0 5px; border: 1px solid #0088cc; }
-        .stat-value { font-size: 24px; color: #0088cc; font-weight: bold; }
+        .stat-box { background-color: #2a2a4a; padding: 15px; border-radius: 10px; text-align: center; flex: 1; margin: 0 5px; border: 1px solid #00cccc; transition: transform 0.2s; }
+        .stat-box:hover { transform: scale(1.05); }
+        .stat-value { font-size: 24px; color: #00cccc; font-weight: bold; }
         .stat-label { font-size: 14px; color: #aaa; }
-        .referral-section { text-align: center; margin: 25px 0; padding: 15px; background-color: #1a1a2a; border-radius: 10px; }
-        .referral-code { padding: 15px; background-color: #2a2a4a; border-radius: 10px; margin: 15px 0; font-size: 18px; letter-spacing: 2px; color: #0088cc; font-weight: bold; border: 1px dashed #0088cc; }
+        .referral-section { text-align: center; margin: 25px 0; padding: 15px; background-color: #2a2a4a; border-radius: 10px; border: 1px dashed #00cccc; }
+        .referral-code { padding: 15px; background-color: #333366; border-radius: 10px; margin: 15px 0; font-size: 18px; letter-spacing: 2px; color: #00cccc; font-weight: bold; }
         .info-text { text-align: center; margin: 15px 0; color: #aaa; font-size: 14px; }
-        .ad-container { background: linear-gradient(135deg, #1a1a2a, #2a2a4a); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; border: 1px solid #0088cc; cursor: pointer; transition: all 0.3s; }
-        .ad-container:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 136, 204, 0.3); }
-        .ad-title { font-size: 20px; margin-bottom: 10px; color: #0088cc; }
+        .ad-container { background: linear-gradient(135deg, #2a2a4a, #333366); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; border: 1px solid #00cccc; cursor: pointer; transition: all 0.3s; }
+        .ad-container:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 255, 204, 0.3); }
+        .ad-title { font-size: 20px; margin-bottom: 10px; color: #00cccc; }
         .ad-description { color: #aaa; margin-bottom: 15px; }
-        .btn { padding: 12px 25px; background-color: #0088cc; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
-        .btn:hover { background-color: #006699; }
+        .btn { padding: 12px 25px; background-color: #00cccc; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .btn:hover { background-color: #006666; }
         .btn:disabled { background-color: #555; cursor: not-allowed; }
-        .loader { border: 5px solid #333; border-top: 5px solid #0088cc; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        .loader { border: 5px solid #333; border-top: 5px solid #00cccc; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
         .withdraw-form { margin-top: 20px; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #333; background-color: #222; color: white; }
-        .ad-status { text-align: center; margin: 15px 0; padding: 10px; background-color: #1a1a2a; border-radius: 10px; }
-        .countdown { font-size: 18px; color: #0088cc; font-weight: bold; margin: 10px 0; }
-        .channel-btn { padding: 12px 25px; background-color: #0088cc; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #00cccc; }
+        .form-group input { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #333; background-color: #222; color: #fff; }
+        .ad-status { text-align: center; margin: 15px 0; padding: 10px; background-color: #2a2a4a; border-radius: 10px; border: 1px solid #00cccc; }
+        .countdown { font-size: 18px; color: #00cccc; font-weight: bold; margin: 10px 0; }
+        .channel-btn { padding: 12px 25px; background-color: #00cccc; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -54,7 +56,7 @@
                     <div id="user-name">Loading...</div>
                     <div id="user-id">ID: Loading...</div>
                 </div>
-                <div id="user-coins">0 🪙</div>
+                <div id="user-coins">0 💰</div>
             </div>
         </div>
         
@@ -68,7 +70,7 @@
             <h2>Your Dashboard</h2>
             <div class="stats">
                 <div class="stat-box">
-                    <div class="stat-value" id="total-coins">0 🪙</div>
+                    <div class="stat-value" id="total-coins">0 💰</div>
                     <div class="stat-label">Total Coins</div>
                 </div>
                 <div class="stat-box">
@@ -85,31 +87,31 @@
                 <div class="referral-code" id="ref-code">Loading...</div>
                 <button class="btn" id="copyReferral">Copy Referral</button>
                 <p id="ref-status"></p>
-                <p>Copy this code with friends to earn 100 coins after 1 hour! <br> Every time you copy referral, use only this, otherwise you won't get coins.</p>
+                <p>Copy this code with friends to earn 100 💰 after 24h! <br> Every time you copy referral, use only this, otherwise you won't get coins.</p>
             </div>
             <div class="info-text">
                 <p>🎯 Daily Limit: 100 ads per day</p>
-                <p>💰 Each ad gives you 20 🪙</p>
+                <p>💰 Each ad gives you 20 💰</p>
             </div>
-            <button class="channel-btn" onclick="joinChannel()">Join Official Channel</button>
+            <button class="channel-btn" id="joinChannelBtn" onclick="joinChannel()">Join Official Channel & Get 200 💰</button>
         </div>
         
         <div id="ads" class="section">
             <h2>Watch Ads & Earn Coins</h2>
-            <p class="info-text">Click on an ad to watch and earn 20 🪙. After 20 ads, refer 2 friends to unlock all ads.</p>
+            <p class="info-text">Click on an ad to watch and earn 20 💰. After 20 ads, refer 5 friends to unlock all ads.</p>
             <div class="ad-container" onclick="watchAd('interstitial')">
                 <div class="ad-title">Rewarded Interstitial Ad</div>
-                <div class="ad-description">Watch a full-screen ad and earn 20 🪙</div>
+                <div class="ad-description">Watch a full-screen ad and earn 20 💰</div>
                 <button class="btn">Watch Ad</button>
             </div>
             <div class="ad-container" onclick="watchAd('popup')">
                 <div class="ad-title">Rewarded Popup Ad</div>
-                <div class="ad-description">Watch a popup ad and earn 20 🪙</div>
+                <div class="ad-description">Watch a popup ad and earn 20 💰</div>
                 <button class="btn">Watch Ad</button>
             </div>
             <div class="ad-container" onclick="watchAd('inApp')">
                 <div class="ad-title">In-App Interstitial Ad</div>
-                <div class="ad-description">Watch an in-app ad and earn 20 🪙</div>
+                <div class="ad-description">Watch an in-app ad and earn 20 💰</div>
                 <button class="btn">Watch Ad</button>
             </div>
             <div class="loader" id="ad-loader"></div>
@@ -123,10 +125,10 @@
         
         <div id="withdraw" class="section">
             <h2>Withdraw Your Earnings</h2>
-            <p class="info-text">Minimum withdrawal: 50,000 🪙 = 25 USDT | Must have 20 referrals</p>
+            <p class="info-text">Minimum withdrawal: 50,000 💰 = 25 USDT | Must have 20 referrals</p>
             <div class="stats">
                 <div class="stat-box">
-                    <div class="stat-value" id="withdraw-coins">0 🪙</div>
+                    <div class="stat-value" id="withdraw-coins">0 💰</div>
                     <div class="stat-label">Your Coins</div>
                 </div>
             </div>
@@ -137,7 +139,7 @@
                 </div>
                 <div class="form-group">
                     <label for="withdraw-amount">Amount to Withdraw (Coins)</label>
-                    <input type="number" id="withdraw-amount" placeholder="Min 50,000 🪙">
+                    <input type="number" id="withdraw-amount" placeholder="Min 50,000 💰">
                 </div>
                 <div class="form-group">
                     <label for="referrals">Number of Referrals</label>
@@ -147,7 +149,7 @@
                 <button class="btn" onclick="makeBinanceAccount()" style="margin-top: 10px;">Make account on Binance</button>
             </div>
         </div>
-         <div class="footer">
+        <div class="footer">
             <p>Earn With Telegram Mini App © 2023</p>
         </div>
     </div>
@@ -171,7 +173,9 @@
             walletAddress: "",
             withdrawals: [],
             referralRewardsPending: {}, // Store pending referral rewards with timestamps
-            lastCopyTime: 0 // Track last copy time for 30-min cooldown
+            lastCopyTime: 0, // Track last copy time for 30-min cooldown
+            referralProgress: {}, // Track referral progress per copy
+            hasJoinedChannel: localStorage.getItem('hasJoinedChannel') === 'true' // Track channel join
         };
 
         function initApp() {
@@ -187,7 +191,12 @@
             updateAdAvailability();
             checkReferralRewards();
             checkReferralCopyRewards();
-            checkForReferral();
+            checkReferralProgress();
+            if (!userData.hasJoinedChannel) {
+                document.getElementById('joinChannelBtn').style.display = 'block';
+            } else {
+                document.getElementById('joinChannelBtn').style.display = 'none';
+            }
         }
 
         function generateReferralCode() {
@@ -204,7 +213,7 @@
                     localStorage.setItem('referralsGiven', JSON.stringify(referralsGiven));
                     userData.referrals += 1;
                     saveUserData();
-                    alert('Referral recorded! You will earn 100 🪙 after 1 hour.');
+                    alert('Referral recorded! You will earn 100 💰 after 24h.');
                 }
             }
         }
@@ -214,19 +223,18 @@
             for (let refCode in referralsGiven) {
                 if (!userData.referralRewardsPending[refCode]) {
                     const timestamp = referralsGiven[refCode].timestamp;
-                    if (Date.now() - timestamp >= 3600000) { // 1 hour = 3600000 ms
+                    if (Date.now() - timestamp >= 86400000) { // 24 hours = 86400000 ms
                         userData.coins += 100;
                         userData.referralRewardsPending[refCode] = true;
                         delete referralsGiven[refCode];
                         localStorage.setItem('referralsGiven', JSON.stringify(referralsGiven));
                         saveUserData();
                         updateUI();
-                        alert('You earned 100 🪙 from a referral!');
+                        alert('You earned 100 💰 from a referral!');
                     }
                 }
             }
         }
-
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -247,13 +255,12 @@
                     saveUserData();
                 }
             }
-            if (userData.adsWatched >= 20 && userData.referrals < 2) {
-                document.getElementById('ad-lock-status').textContent = 'Refer 2 friends to unlock all ads!';
-                alert('You need to refer 2 friends to unlock more ads after 20 ads.');
+            if (userData.adsWatched >= 20 && userData.referrals < 5) {
+                document.getElementById('ad-lock-status').textContent = `Refer 5 friends to unlock all ads! (${userData.referrals}/5 completed)`;
+                alert('You need to refer 5 friends to unlock more ads after 20 ads.');
                 return;
             }
-
-            const now = Date.now();
+                        const now = Date.now();
             if (now - userData.lastAdTime < 15000) {
                 const timeLeft = Math.ceil((15000 - (now - userData.lastAdTime)) / 1000);
                 document.getElementById('next-ad').textContent = `Next ad available in: ${timeLeft}s`;
@@ -303,7 +310,7 @@
             updateUI();
             startCountdown();
             saveUserData();
-            alert('You earned 20 🪙!');
+            alert('You earned 20 💰!');
         }
 
         function startCountdown() {
@@ -344,8 +351,8 @@
             } else {
                 document.getElementById('next-ad').textContent = 'Next ad available: Now';
             }
-            if (userData.adsWatched >= 20 && userData.referrals < 2) {
-                document.getElementById('ad-lock-status').textContent = 'Refer 2 friends to unlock all ads!';
+            if (userData.adsWatched >= 20 && userData.referrals < 5) {
+                document.getElementById('ad-lock-status').textContent = `Refer 5 friends to unlock all ads! (${userData.referrals}/5 completed)`;
             } else {
                 document.getElementById('ad-lock-status').textContent = '';
             }
@@ -353,36 +360,38 @@
 
         function checkAdReset() {
             const now = Date.now();
-            if (userData.adsToday >= 100 && now - userData.lastAdResetTime >= 43200000) {
+            if (userData.adsToday > 0 && now - userData.lastAdResetTime >= 43200000) { // 12 hours
                 userData.adsToday = 0;
                 userData.lastAdResetTime = now;
                 saveUserData();
+                updateUI();
+                alert('Daily ad limit has been reset! You can watch ads again.');
             }
         }
 
         function updateUI() {
             document.getElementById('user-name').textContent = userData.userName;
             document.getElementById('user-id').textContent = `ID: ${userData.userId}`;
-            document.getElementById('user-coins').textContent = `${userData.coins} 🪙`;
-            document.getElementById('total-coins').textContent = `${userData.coins} 🪙`;
+            document.getElementById('user-coins').textContent = `${userData.coins} 💰`;
+            document.getElementById('total-coins').textContent = `${userData.coins} 💰`;
             document.getElementById('ads-watched').textContent = userData.adsWatched;
             document.getElementById('ref-count').textContent = userData.referrals;
             document.getElementById('ref-code').textContent = userData.referralCode;
             document.getElementById('ads-today').textContent = `Ads watched today: ${userData.adsToday}/100`;
-            document.getElementById('withdraw-coins').textContent = `${userData.coins} 🪙`;
-            document.getElementById('ref-status').textContent = userData.referrals >= 2 ? `2 referrals completed!` : '';
+            document.getElementById('withdraw-coins').textContent = `${userData.coins} 💰`;
+            document.getElementById('ref-status').textContent = userData.referrals >= 5 ? `5 referrals completed! Ads unlocked!` : '';
         }
 
         function saveUserData() {
             localStorage.setItem('userData', JSON.stringify(userData));
         }
 
-                function requestWithdrawal() {
+        function requestWithdrawal() {
             const walletAddress = document.getElementById('wallet-address').value;
             const withdrawAmount = parseInt(document.getElementById('withdraw-amount').value);
             const referrals = parseInt(document.getElementById('referrals').value);
             if (!walletAddress || withdrawAmount < 50000) {
-                alert('Please enter a valid wallet address and minimum 50,000 🪙.');
+                alert('Please enter a valid wallet address and minimum 50,000 💰.');
                 return;
             }
             if (withdrawAmount > userData.coins) {
@@ -397,7 +406,7 @@
             userData.withdrawals.push({ amount: withdrawAmount, address: walletAddress, date: new Date().toISOString(), referrals: referrals });
             saveUserData();
             updateUI();
-            alert('Withdrawal request submitted successfully! You will receive 25 USDT for 50,000 🪙.');
+            alert('Withdrawal request submitted successfully! You will receive 25 USDT for 50,000 💰.');
             document.getElementById('wallet-address').value = '';
             document.getElementById('withdraw-amount').value = '';
             document.getElementById('referrals').value = '';
@@ -419,59 +428,75 @@
             navigator.clipboard.writeText(referralMessage).then(() => {
                 alert('Referral message copied to clipboard! Use only this to get coins.');
                 userData.lastCopyTime = now;
-                const referralsCopied = JSON.parse(localStorage.getItem('referralsCopied') || '{}');
-                referralsCopied[userData.referralCode] = { timestamp: now };
-                localStorage.setItem('referralsCopied', JSON.stringify(referralsCopied));
+                userData.referralProgress[now] = { timestamp: now, referralsCount: 0 };
+                localStorage.setItem('referralsCopied', JSON.stringify(userData.referralProgress));
                 checkReferralCopyRewards();
+                checkReferralProgress();
             }).catch(() => {
                 alert('Failed to copy. Please try again.');
             });
         });
 
         function checkReferralCopyRewards() {
-            const referralsCopied = JSON.parse(localStorage.getItem('referralsCopied') || '{}');
-            for (let refCode in referralsCopied) {
-                const timestamp = referralsCopied[refCode].timestamp;
-                if (Date.now() - timestamp >= 3600000) { // 1 hour = 3600000 ms
+            const referralProgress = JSON.parse(localStorage.getItem('referralsCopied') || '{}');
+            for (let timestamp in referralProgress) {
+                const data = referralProgress[timestamp];
+                if (Date.now() - data.timestamp >= 86400000 && data.referralsCount < 5) { // 24h for first
+                    data.referralsCount = 1;
+                    userData.referrals += 1;
                     userData.coins += 100;
-                    userData.referrals += 2; // Add 2 referrals now
-                    delete referralsCopied[refCode];
-                    localStorage.setItem('referralsCopied', JSON.stringify(referralsCopied));
+                    data.timestamp = Date.now(); // Reset for next interval
+                    localStorage.setItem('referralsCopied', JSON.stringify(referralProgress));
                     saveUserData();
                     updateUI();
-                    alert('You earned 100 🪙 and 2 referrals for copying your referral!');
+                    alert('1 referral completed! You earned 100 💰!');
+                } else if (Date.now() - data.timestamp >= 86400000 + (data.referralsCount * 7200000) && data.referralsCount < 5) { // 2h intervals
+                    data.referralsCount += 1;
+                    userData.referrals += 1;
+                    userData.coins += 100;
+                    data.timestamp = Date.now(); // Reset for next interval
+                    localStorage.setItem('referralsCopied', JSON.stringify(referralProgress));
+                    saveUserData();
+                    updateUI();
+                    alert(`${data.referralsCount} referrals completed! You earned 100 💰!`);
+                }
+                if (data.referralsCount >= 5) {
+                    delete referralProgress[timestamp];
+                    localStorage.setItem('referralsCopied', JSON.stringify(referralProgress));
                 }
             }
         }
 
-        function checkReferralRewards() {
-            const referralsGiven = JSON.parse(localStorage.getItem('referralsGiven') || '{}');
-            for (let refCode in referralsGiven) {
-                if (!userData.referralRewardsPending[refCode]) {
-                    const timestamp = referralsGiven[refCode].timestamp;
-                    if (Date.now() - timestamp >= 3600000) { // 1 hour = 3600000 ms
-                        userData.coins += 100;
-                        userData.referralRewardsPending[refCode] = true;
-                        delete referralsGiven[refCode];
-                        localStorage.setItem('referralsGiven', JSON.stringify(referralsGiven));
-                        saveUserData();
-                        updateUI();
-                        alert('You earned 100 🪙 from a referral!');
-                    }
+        function checkReferralProgress() {
+            const referralProgress = JSON.parse(localStorage.getItem('referralsCopied') || '{}');
+            for (let timestamp in referralProgress) {
+                const data = referralProgress[timestamp];
+                document.getElementById('ref-status').textContent = `${data.referralsCount} referrals completed!`;
+                if (data.referralsCount >= 5) {
+                    document.getElementById('ref-status').textContent = `5 referrals completed! Ads unlocked!`;
                 }
             }
         }
 
         function joinChannel() {
-            window.open('https://t.me/kxearnig', '_blank');
+            if (!userData.hasJoinedChannel) {
+                window.open('https://t.me/kxearnig', '_blank');
+                userData.coins += 200;
+                userData.hasJoinedChannel = true;
+                localStorage.setItem('hasJoinedChannel', 'true');
+                saveUserData();
+                updateUI();
+                alert('You earned 200 💰 for joining the channel!');
+                document.getElementById('joinChannelBtn').style.display = 'none';
+            }
         }
 
         // Initialize the app
         initApp();
         setInterval(checkReferralRewards, 60000); // Check every minute
         setInterval(checkReferralCopyRewards, 60000); // Check every minute
-        setInterval(checkAdReset, 60000); // Check ad reset every minute
+        setInterval(checkAdReset, 60000); // Check ad reset every 12 hours
+        setInterval(checkReferralProgress, 60000); // Check referral progress every minute
     </script>
 </body>
 </html>
-            
