@@ -1,32 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>CryptoAI Analyzer</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CryptoAI</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <main class="shell">
+    <section class="card">
+      <div class="brand">
+        <div class="logo">🚀</div>
+        <h1>CryptoAI</h1>
+        <p>Secure login for your dashboard</p>
+      </div>
 
-<div class="card">
-  <h2>🚀 CryptoAI</h2>
+      <div class="grid">
+        <input type="text" id="username" placeholder="Choose username" autocomplete="nickname" />
+        <input type="email" id="email" placeholder="Email address" autocomplete="email" />
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+      </div>
 
-  <input type="email" id="email" placeholder="Enter Email">
-  <input type="password" id="password" placeholder="Enter Password">
+      <div class="actions">
+        <button class="primary" type="button" onclick="signup()">Sign Up</button>
+        <button class="secondary" type="button" onclick="login()">Login</button>
+      </div>
 
-  <button onclick="signup()">Sign Up</button>
-  <button onclick="login()">Login</button>
+      <button class="linkbtn" type="button" onclick="forgotPassword()">Forgot Password?</button>
 
-  <p class="link" onclick="forgotPassword()">Forgot Password?</p>
+      <div class="divider"><span>OR</span></div>
 
-  <hr>
+      <button class="google" type="button" onclick="googleLogin()">Continue with Google</button>
+      <button class="danger" type="button" onclick="logout()">Logout</button>
 
-  <button class="google" onclick="googleLogin()">Continue with Google</button>
+      <section class="status">
+        <div class="label">Status</div>
+        <div id="status">Not logged in</div>
+        <div id="dashboardName" class="name"></div>
+      </section>
+    </section>
+  </main>
 
-  <p id="user"></p>
-
-  <button class="logout" onclick="logout()">Logout</button>
-</div>
-
-<script type="module" src="app.js"></script>
-
+  <script type="module" src="app.js"></script>
 </body>
-</html>
+        </html>
