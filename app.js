@@ -1,11 +1,5 @@
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-// AUTO REDIRECT
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    window.location.href = "dashboard.html";
-  }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
 import {
   getAuth,
   setPersistence,
@@ -21,6 +15,7 @@ import {
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 import {
   getFirestore,
   doc,
@@ -29,14 +24,11 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// 🔥 CONFIG
 const firebaseConfig = {
-  apiKey: "AIzaSyCX-lQnfA7mjt5P09TTw4Xn8hretwPPTrA",
+  apiKey: "AIzaSyCX...",
   authDomain: "earncrypto-26d59.firebaseapp.com",
-  projectId: "earncrypto-26d59",
-  storageBucket: "earncrypto-26d59.firebasestorage.app",
-  messagingSenderId: "98622740161",
-  appId: "1:98622740161:web:83e7ec5ed8c4b4046c2640",
-  measurementId: "G-SSHSZ2TZBP"
+  projectId: "earncrypto-26d59"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -44,185 +36,87 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-provider.setCustomParameters({ prompt: "select_account" });
-
-const statusEl = document.getElementById("status");
-const nameEl = document.getElementById("dashboardName");
-const pendingKey = "cryptoai_pending_username";
-
-const isMobile =
-  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-  window.matchMedia("(max-width: 768px)").matches;
-
+// 🔐 SESSION SAVE
 await setPersistence(auth, browserLocalPersistence);
 
-function getEmail() {
-  return document.getElementById("email").value.trim();
-}
+// ===== INPUT HELPERS =====
+const getEmail = () => document.getElementById("email").value.trim();
+const getPassword = () => document.getElementById("password").value.trim();
+const getUsername = () => document.getElementById("username").value.trim();
 
-function getPassword() {
-  return document.getElementById("password").value.trim();
-}
-
-function getUsername() {
-  return document.getElementById("username").value.trim();
-}
-
-function setStatus(loggedIn, email = "", username = "") {
-  if (!loggedIn) {
-    statusEl.textContent = "Not logged in";
-    nameEl.textContent = "";
-    return;
-  }
-  statusEl.textContent = `Logged in as ${email || "Google user"}`;
-  nameEl.textContent = `Username: ${username || "User"}`;
-}
-
-async function saveUserProfile(user, chosenUsername = "") {
-  const ref = doc(db, "users", user.uid);
-  const snap = await getDoc(ref);
-  const existing = snap.exists() ? snap.data() : {};
-
-  const username =
-    chosenUsername ||
-    getUsername() ||
-    existing.username ||
-    user.displayName ||
-    (user.email ? user.email.split("@")[0] : "user");
-
-  const profile = {
+// ===== SAVE USER =====
+async function saveUser(user, username) {
+  await setDoc(doc(db, "users", user.uid), {
     uid: user.uid,
-    email: user.email || existing.email || "",
-    username,
-    displayName: user.displayName || username,
-    photoURL: user.photoURL || existing.photoURL || "",
-    provider: user.providerData?.[0]?.providerId || existing.provider || "password",
-    emailVerified: user.emailVerified ?? existing.emailVerified ?? false,
-    createdAt: existing.createdAt || serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    lastLoginAt: serverTimestamp()
-  };
-
-  await setDoc(ref, profile, { merge: true });
-
-  try {
-    if (user.displayName !== username) {
-      await updateProfile(user, { displayName: username });
-    }
-  } catch (_) {}
-
-  return username;
+    email: user.email,
+    username: username || user.displayName || "User",
+    createdAt: serverTimestamp()
+  }, { merge: true });
 }
 
-async function handleSignedInUser(user, preferredUsername = "") {
-  const username = await saveUserProfile(user, preferredUsername || localStorage.getItem(pendingKey) || "");
-  localStorage.removeItem(pendingKey);
-  setStatus(true, user.email || "", username);
-}
-
+// ===== SIGNUP =====
 window.signup = async () => {
-  const username = getUsername();
   const email = getEmail();
   const password = getPassword();
+  const username = getUsername();
 
-  if (!username || !email || !password) {
-    alert("Username, email aur password teeno bharo.");
+  if (!email || !password || !username) {
+    alert("Sab fill karo");
     return;
   }
 
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await handleSignedInUser(cred.user, username);
-    alert("Signup successful");
+
+    await updateProfile(cred.user, { displayName: username });
+    await saveUser(cred.user, username);
+
+    alert("Signup success");
   } catch (e) {
     alert(e.message);
   }
 };
 
+// ===== LOGIN =====
 window.login = async () => {
-  const email = getEmail();
-  const password = getPassword();
-  const username = getUsername();
-
-  if (!email || !password) {
-    alert("Email aur password bharo.");
-    return;
-  }
-
   try {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    await handleSignedInUser(cred.user, username);
-    alert("Login successful");
+    await signInWithEmailAndPassword(auth, getEmail(), getPassword());
+    alert("Login success");
   } catch (e) {
     alert(e.message);
   }
 };
 
+// ===== GOOGLE LOGIN =====
 window.googleLogin = async () => {
-  const typedUsername = getUsername();
-  if (typedUsername) {
-    localStorage.setItem(pendingKey, typedUsername);
-  }
-
   try {
-    if (isMobile) {
-      await signInWithRedirect(auth, provider);
-      return;
-    }
-
-    const cred = await signInWithPopup(auth, provider);
-    await handleSignedInUser(cred.user, typedUsername);
+    await signInWithPopup(auth, provider);
   } catch (e) {
     alert(e.message);
   }
 };
 
+// ===== PASSWORD RESET =====
 window.forgotPassword = async () => {
   const email = getEmail();
 
   if (!email) {
-    alert("Reset mail bhejne ke liye email likho.");
+    alert("Email likho");
     return;
   }
 
   try {
     await sendPasswordResetEmail(auth, email);
-    alert("Password reset email sent.");
+    alert("Reset email sent");
   } catch (e) {
     alert(e.message);
   }
 };
 
-window.logout = async () => {
-  localStorage.removeItem(pendingKey);
-  await signOut(auth);
-  setStatus(false);
-};
-
-try {
-  const redirectResult = await getRedirectResult(auth);
-  if (redirectResult?.user) {
-    await handleSignedInUser(redirectResult.user, localStorage.getItem(pendingKey) || "");
+// ===== AUTH STATE =====
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // 🔥 REDIRECT TO DASHBOARD
+    window.location.replace("./dashboard.html");
   }
-} catch (e) {
-  console.log("Redirect sign-in error:", e.message);
-}
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    setStatus(false);
-    return;
-  }
-
-  const ref = doc(db, "users", user.uid);
-  const snap = await getDoc(ref);
-
-  if (!snap.exists()) {
-    await handleSignedInUser(user, getUsername());
-    return;
-  }
-
-  const data = snap.data();
-  const username = data.username || user.displayName || (user.email ? user.email.split("@")[0] : "user");
-  setStatus(true, user.email || data.email || "", username);
 });
