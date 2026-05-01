@@ -1,34 +1,21 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
-import {
-  getAuth,
-  setPersistence,
-  browserLocalPersistence,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
-  sendPasswordResetEmail,
-  updateProfile,
-  signOut,
-  onAuthStateChanged
+import { 
+  getAuth, setPersistence, browserLocalPersistence, 
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, 
+  GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, 
+  onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-// 🔥 CONFIG
+// Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyCX...",
+  apiKey: "AIzaSyCX-lQnfA7mjt5P09TTw4Xn8hretwPPTrA",
   authDomain: "earncrypto-26d59.firebaseapp.com",
-  projectId: "earncrypto-26d59"
+  projectId: "earncrypto-26d59",
+  storageBucket: "earncrypto-26d59.firebasestorage.app",
+  messagingSenderId: "98622740161",
+  appId: "1:98622740161:web:83e7ec5ed8c4b4046c2640",
+  measurementId: "G-SSHSZ2TZBP"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -36,87 +23,82 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// 🔐 SESSION SAVE
-await setPersistence(auth, browserLocalPersistence);
+// Ensure session persists
+setPersistence(auth, browserLocalPersistence);
 
-// ===== INPUT HELPERS =====
-const getEmail = () => document.getElementById("email").value.trim();
-const getPassword = () => document.getElementById("password").value.trim();
-const getUsername = () => document.getElementById("username").value.trim();
+// Redirect to dashboard if already logged in
+onAuthStateChanged(auth, (user) => {
+  if (user && window.location.pathname.includes("index.html") || user && window.location.pathname === "/") {
+    window.location.replace("dashboard.html");
+  }
+});
 
-// ===== SAVE USER =====
-async function saveUser(user, username) {
+// Helper functions
+const getVal = (id) => document.getElementById(id).value.trim();
+
+// Save user profile to Firestore
+async function saveUserToFirestore(user, customUsername) {
+  const username = customUsername || user.displayName || user.email.split("@")[0];
   await setDoc(doc(db, "users", user.uid), {
     uid: user.uid,
     email: user.email,
-    username: username || user.displayName || "User",
+    username: username,
     createdAt: serverTimestamp()
   }, { merge: true });
 }
 
-// ===== SIGNUP =====
-window.signup = async () => {
-  const email = getEmail();
-  const password = getPassword();
-  const username = getUsername();
+// UI Event Listeners
+document.addEventListener("DOMContentLoaded", () => {
+  
+  // SIGN UP
+  document.getElementById("btn-signup")?.addEventListener("click", async () => {
+    const email = getVal("email");
+    const password = getVal("password");
+    const username = getVal("username");
 
-  if (!email || !password || !username) {
-    alert("Sab fill karo");
-    return;
-  }
+    if (!email || !password || !username) return alert("Please fill all fields (Username is required).");
 
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await saveUserToFirestore(userCredential.user, username);
+    } catch (error) {
+      alert("Sign up error: " + error.message);
+    }
+  });
 
-    await updateProfile(cred.user, { displayName: username });
-    await saveUser(cred.user, username);
+  // LOGIN
+  document.getElementById("btn-login")?.addEventListener("click", async () => {
+    const email = getVal("email");
+    const password = getVal("password");
+    if (!email || !password) return alert("Please enter email and password.");
 
-    alert("Signup success");
-  } catch (e) {
-    alert(e.message);
-  }
-};
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      alert("Login error: " + error.message);
+    }
+  });
 
-// ===== LOGIN =====
-window.login = async () => {
-  try {
-    await signInWithEmailAndPassword(auth, getEmail(), getPassword());
-    alert("Login success");
-  } catch (e) {
-    alert(e.message);
-  }
-};
+  // GOOGLE LOGIN
+  document.getElementById("btn-google")?.addEventListener("click", async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      await saveUserToFirestore(result.user, null);
+    } catch (error) {
+      alert("Google login error: " + error.message);
+    }
+  });
 
-// ===== GOOGLE LOGIN =====
-window.googleLogin = async () => {
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (e) {
-    alert(e.message);
-  }
-};
+  // FORGOT PASSWORD
+  document.getElementById("btn-forgot")?.addEventListener("click", async () => {
+    const email = getVal("email");
+    if (!email) return alert("Please enter your email address to reset password.");
 
-// ===== PASSWORD RESET =====
-window.forgotPassword = async () => {
-  const email = getEmail();
-
-  if (!email) {
-    alert("Email likho");
-    return;
-  }
-
-  try {
-    await sendPasswordResetEmail(auth, email);
-    alert("Reset email sent");
-  } catch (e) {
-    alert(e.message);
-  }
-};
-
-// ===== AUTH STATE =====
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // 🔥 REDIRECT TO DASHBOARD
-    window.location.replace("./dashboard.html");
-  }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent! Check your inbox.");
+    } catch (error) {
+      alert("Reset error: " + error.message);
+    }
+  });
 });
