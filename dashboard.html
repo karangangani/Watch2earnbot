@@ -3,22 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - TradeNova AI</title>
+  <title>TradeNova AI - Institutional Dashboard</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- AI OCR Library -->
+  <!-- Advanced AI OCR Core -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 </head>
 <body>
   
   <header class="topbar">
-    <div class="logo">🌌 TradeNova AI <span class="badge-pro">PRO</span></div>
+    <div class="logo">
+      <span class="pulse-dot"></span> TradeNova Core <span class="badge-pro">V-2.0</span>
+    </div>
     <div class="topbar-right">
       <span class="user-greeting">Welcome, <span id="display-username">Trader</span></span>
       <button id="btn-settings" class="icon-btn">⚙️</button>
       
-      <div id="settings-menu" class="settings-dropdown glass">
-        <button id="btn-theme" class="btn secondary">🌗 Toggle Theme</button>
-        <button id="btn-logout" class="btn secondary danger-btn">🚪 Logout</button>
+      <div id="settings-menu" class="settings-dropdown glass hidden">
+        <button id="btn-theme" class="btn secondary">🌗 System Theme</button>
+        <button id="btn-logout" class="btn secondary danger-btn">🚪 Terminate Session</button>
       </div>
     </div>
   </header>
@@ -29,81 +31,106 @@
 
     <main class="dashboard-grid">
       
-      <!-- Left Column: AI Scanner & Upload -->
+      <!-- Left Column: Neural Scanner -->
       <div class="main-content">
         <div class="card glass">
-          <h2>Advanced Chart Scanner</h2>
-          <p class="subtitle">Supports Forex, Stocks, and Crypto. Auto-detects timeframes.</p>
+          <div class="card-header">
+            <h2>Neural Chart Processing</h2>
+            <span class="status-indicator live">SYSTEM ONLINE</span>
+          </div>
+          <p class="subtitle">Upload asset chart. Auto-detects Order Blocks, FVG, and Market Structure.</p>
           
           <label class="upload-area" id="upload-container">
             <div id="upload-placeholder">
-              <span class="upload-icon">📊</span>
-              <p>Click or Drop Chart Screenshot</p>
-              <p class="subtitle">High Quality Images give better AI results</p>
+              <div class="upload-icon-container">
+                <span class="upload-icon">⛬</span>
+              </div>
+              <p class="upload-title">INITIALIZE SCAN</p>
+              <p class="subtitle">Drop high-resolution chart (PNG/JPG)</p>
             </div>
             
             <div class="image-preview-wrapper" id="preview-wrapper">
               <img id="preview-image" alt="Chart Preview" />
-              <!-- Sci-Fi Scanner Grid -->
-              <div class="scanner-grid" id="scanner-grid"></div>
-              <div class="scanner-line" id="scanner-line"></div>
+              <!-- HUD Scanner Overlay -->
+              <div class="hud-overlay" id="hud-overlay"></div>
+              <div class="scanner-laser" id="scanner-line"></div>
             </div>
             <input type="file" id="file-upload" accept="image/*" style="display: none;" />
           </label>
 
-          <button id="btn-analyze" class="btn primary full-width hidden">Initialize AI Core</button>
+          <button id="btn-analyze" class="btn primary full-width hidden">EXECUTE DEEP ANALYSIS</button>
           
-          <!-- Loading Console -->
-          <div id="ai-status-container" class="hidden">
-            <p id="ai-status" class="terminal-text">Initializing OCR Engine...</p>
+          <!-- System Terminal (Loading) -->
+          <div id="ai-status-container" class="terminal-box hidden">
+            <div class="terminal-header">
+              <span>Terminal</span>
+              <span>_ □ X</span>
+            </div>
+            <div class="terminal-body" id="terminal-body">
+              <p class="log-text">> Awaiting input...</p>
+            </div>
             <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
           </div>
 
-          <!-- Error Message -->
+          <!-- Error Alert -->
           <div id="error-card" class="error-card hidden">
-            <h3>⚠️ Market Data Not Found</h3>
-            <p>We couldn't detect any valid Candlesticks, Price action, or Chart indicators (like USDT, EUR/USD, 1H, 5m). Please upload a valid trading chart.</p>
+            <h3>CRITICAL ERROR: INVALID DATA</h3>
+            <p>The neural engine failed to detect valid candlestick data, market structure, or institutional pricing. Please provide a legitimate trading chart.</p>
           </div>
 
           <!-- AI RESULT CARD -->
           <div id="result-card" class="result-card glass hidden">
             <div class="verdict-header">
-              <h3>AI Trading Verdict</h3>
+              <div>
+                <h3 style="color: var(--text-muted); font-size: 12px; letter-spacing: 2px;">ALGORITHMIC VERDICT</h3>
+                <h2 id="res-trend" style="font-size: 20px; margin-top: 5px;">--</h2>
+              </div>
               <span id="res-signal" class="signal-badge">--</span>
             </div>
             
-            <!-- Dynamic Data Extracted from Image -->
-            <div class="detected-data">
-              <div class="data-badge">🏷️ Market: <strong id="res-market">--</strong></div>
-              <div class="data-badge">⏱️ Timeframe: <strong id="res-timeframe">--</strong></div>
-              <div class="data-badge">🧠 Strategy: <strong id="res-strategy">--</strong></div>
+            <div class="data-grid">
+              <div class="data-cell">
+                <span class="cell-label">ASSET CLASS</span>
+                <span class="cell-value" id="res-market">--</span>
+              </div>
+              <div class="data-cell">
+                <span class="cell-label">TIMEFRAME</span>
+                <span class="cell-value" id="res-timeframe">--</span>
+              </div>
+              <div class="data-cell">
+                <span class="cell-label">PRIMARY MODEL</span>
+                <span class="cell-value highlight-blue" id="res-strategy">--</span>
+              </div>
             </div>
 
-            <p id="res-reason" class="analysis-text">...</p>
+            <div class="analysis-box">
+              <span class="cell-label">INSTITUTIONAL BREAKDOWN</span>
+              <p id="res-reason" class="analysis-text">...</p>
+            </div>
             
             <div class="stats-grid">
               <div class="stat-box">
-                <div class="stat-label">AI Confidence Level</div>
-                <div id="res-confidence" class="stat-value highlight-blue">--%</div>
+                <div class="stat-label">Model Confidence</div>
+                <div id="res-confidence" class="stat-value text-green">--%</div>
               </div>
               <div class="stat-box">
-                <div class="stat-label">Detected Trend</div>
-                <div id="res-trend" class="stat-value">--</div>
+                <div class="stat-label">Risk/Reward Profile</div>
+                <div id="res-rr" class="stat-value">--</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Right Column: Sidebar -->
+      <!-- Right Column: Live Data feed -->
       <aside class="sidebar">
         <!-- SIDEBAR AD -->
         <div class="ad-banner ad-side">Sidebar Ad (250x250)</div>
 
-        <div class="card glass">
-          <h3>📰 Live Market News</h3>
+        <div class="card glass terminal-style">
+          <h3 class="widget-title">Live Global Feed</h3>
           <div id="news-container">
-            <p class="subtitle">Syncing live data...</p>
+            <div class="loading-pulse">Establishing connection to node...</div>
           </div>
         </div>
       </aside>
