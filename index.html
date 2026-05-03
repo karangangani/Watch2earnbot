@@ -3,36 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TradeNova AI - Login</title>
+  <title>TradeNox AI - Secure Portal</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="auth-container shell">
-    <div class="card glass">
-      <div class="brand">
-        <div class="logo">🌌</div>
-        <h1>TradeNova AI</h1>
-        <p class="subtitle">Next-Gen Crypto Analysis</p>
+    <div class="card glass auth-card">
+      <div class="brand text-center">
+        <div class="logo-large">🌌</div>
+        <h1>TradeNox AI</h1>
+        <p class="subtitle">Start trading with next-gen AI today</p>
       </div>
 
-      <form id="auth-form" class="grid">
-        <!-- Username is required for signup -->
-        <input type="text" id="username" placeholder="Username (Required for Sign Up)" autocomplete="nickname" />
-        <input type="email" id="email" placeholder="Email address" autocomplete="email" required />
-        <input type="password" id="password" placeholder="Password" autocomplete="current-password" required />
+      <!-- Toggle Tabs like the reference image -->
+      <div class="auth-tabs">
+        <button id="tab-login" class="tab-btn active">Sign In</button>
+        <button id="tab-register" class="tab-btn">Register</button>
+      </div>
+
+      <form id="auth-form" class="grid auth-form-container">
         
-        <div class="actions">
-          <button type="button" id="btn-signup" class="btn primary">Sign Up</button>
-          <button type="button" id="btn-login" class="btn secondary">Login</button>
+        <div id="username-container" class="input-group hidden">
+          <label>Username</label>
+          <input type="text" id="username" placeholder="Enter your username" autocomplete="nickname" />
         </div>
 
-        <button type="button" id="btn-forgot" class="btn-text">Forgot Password?</button>
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="Enter your email" autocomplete="email" required />
+        </div>
 
-        <div class="divider"><span>OR</span></div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required />
+        </div>
+        
+        <div class="auth-helpers" id="auth-helpers">
+          <label class="remember-me">
+            <input type="checkbox" id="remember"> Remember me
+          </label>
+          <button type="button" id="btn-forgot" class="btn-text">Forgot Password?</button>
+        </div>
 
-        <button type="button" id="btn-google" class="btn google">
+        <div class="actions">
+          <button type="button" id="btn-submit" class="btn primary full-width">Sign In</button>
+        </div>
+
+        <div class="divider"><span>Or</span></div>
+
+        <button type="button" id="btn-google" class="btn secondary full-width google-btn">
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" width="18"/>
-          Continue with Google
+          Sign In with Google
         </button>
       </form>
     </div>
@@ -40,4 +61,4 @@
 
   <script type="module" src="app.js"></script>
 </body>
-          </html>
+            </html>
