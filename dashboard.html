@@ -3,68 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TradeNova AI - Institutional Dashboard</title>
+  <title>TradeNox AI - Institutional Dashboard</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Advanced AI OCR Core -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+  <!-- Tesseract is REMOVED. We are using pure Gemini AI now. -->
 </head>
 <body>
   
   <header class="topbar">
     <div class="logo">
-      <span class="pulse-dot"></span> TradeNova Core <span class="badge-pro">V-2.0</span>
+      <span class="pulse-dot"></span> TradeNox Core <span class="badge-pro">PRO AI</span>
     </div>
     <div class="topbar-right">
       <span class="user-greeting">Welcome, <span id="display-username">Trader</span></span>
       <button id="btn-settings" class="icon-btn">⚙️</button>
-      
       <div id="settings-menu" class="settings-dropdown glass hidden">
-        <button id="btn-theme" class="btn secondary">🌗 System Theme</button>
         <button id="btn-logout" class="btn secondary danger-btn">🚪 Terminate Session</button>
       </div>
     </div>
   </header>
 
   <div class="dashboard-container">
-    <!-- TOP AD BANNER -->
-    <div class="ad-banner ad-top">Advertisement Space (728x90)</div>
-
     <main class="dashboard-grid">
       
-      <!-- Left Column: Neural Scanner -->
       <div class="main-content">
         <div class="card glass">
           <div class="card-header">
-            <h2>Neural Chart Processing</h2>
-            <span class="status-indicator live">SYSTEM ONLINE</span>
+            <h2>Gemini Vision Neural Scan</h2>
+            <span class="status-indicator live">GEMINI ONLINE</span>
           </div>
-          <p class="subtitle">Upload asset chart. Auto-detects Order Blocks, FVG, and Market Structure.</p>
+          <p class="subtitle">Upload chart. AI will analyze structure and provide specific entry zones.</p>
           
           <label class="upload-area" id="upload-container">
             <div id="upload-placeholder">
-              <div class="upload-icon-container">
-                <span class="upload-icon">⛬</span>
-              </div>
+              <div class="upload-icon-container"><span class="upload-icon">⛬</span></div>
               <p class="upload-title">INITIALIZE SCAN</p>
               <p class="subtitle">Drop high-resolution chart (PNG/JPG)</p>
             </div>
             
             <div class="image-preview-wrapper" id="preview-wrapper">
               <img id="preview-image" alt="Chart Preview" />
-              <!-- HUD Scanner Overlay -->
-              <div class="hud-overlay" id="hud-overlay"></div>
               <div class="scanner-laser" id="scanner-line"></div>
             </div>
             <input type="file" id="file-upload" accept="image/*" style="display: none;" />
           </label>
 
-          <button id="btn-analyze" class="btn primary full-width hidden">EXECUTE DEEP ANALYSIS</button>
+          <button id="btn-analyze" class="btn primary full-width hidden">GENERATE TRADING SIGNAL</button>
           
-          <!-- System Terminal (Loading) -->
           <div id="ai-status-container" class="terminal-box hidden">
             <div class="terminal-header">
-              <span>Terminal</span>
-              <span>_ □ X</span>
+              <span>Gemini Engine</span>
             </div>
             <div class="terminal-body" id="terminal-body">
               <p class="log-text">> Awaiting input...</p>
@@ -72,10 +59,9 @@
             <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
           </div>
 
-          <!-- Error Alert -->
           <div id="error-card" class="error-card hidden">
-            <h3>CRITICAL ERROR: INVALID DATA</h3>
-            <p>The neural engine failed to detect valid candlestick data, market structure, or institutional pricing. Please provide a legitimate trading chart.</p>
+            <h3>CRITICAL ERROR</h3>
+            <p>Vision API failed to analyze the chart. Please try again.</p>
           </div>
 
           <!-- AI RESULT CARD -->
@@ -88,14 +74,26 @@
               <span id="res-signal" class="signal-badge">--</span>
             </div>
             
-            <div class="data-grid">
-              <div class="data-cell">
-                <span class="cell-label">ASSET CLASS</span>
-                <span class="cell-value" id="res-market">--</span>
+            <!-- NEW: ENTRY / SL / TP GRID -->
+            <div class="execution-grid">
+              <div class="exec-box entry-box">
+                <span class="exec-label">ENTRY POINT</span>
+                <span class="exec-value" id="res-entry">--</span>
               </div>
+              <div class="exec-box stop-box">
+                <span class="exec-label">STOP LOSS (SL)</span>
+                <span class="exec-value" id="res-sl">--</span>
+              </div>
+              <div class="exec-box target-box">
+                <span class="exec-label">TAKE PROFIT (TP)</span>
+                <span class="exec-value" id="res-tp">--</span>
+              </div>
+            </div>
+
+            <div class="data-grid" style="margin-top: 15px;">
               <div class="data-cell">
-                <span class="cell-label">TIMEFRAME</span>
-                <span class="cell-value" id="res-timeframe">--</span>
+                <span class="cell-label">AI CONFIDENCE</span>
+                <span class="cell-value text-green" id="res-confidence">--</span>
               </div>
               <div class="data-cell">
                 <span class="cell-label">PRIMARY MODEL</span>
@@ -108,36 +106,16 @@
               <p id="res-reason" class="analysis-text">...</p>
             </div>
             
-            <div class="stats-grid">
-              <div class="stat-box">
-                <div class="stat-label">Model Confidence</div>
-                <div id="res-confidence" class="stat-value text-green">--%</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-label">Risk/Reward Profile</div>
-                <div id="res-rr" class="stat-value">--</div>
-              </div>
+            <!-- LEGAL DISCLAIMER -->
+            <div class="legal-disclaimer">
+              <strong>⚠️ DISCLAIMER:</strong> This AI generates estimates based on chart patterns. These are NOT 100% perfect trading signals. Cryptocurrency and Forex trading involve high risk. Manage your own risk. Do not trade money you cannot afford to lose. TradeNox AI is not liable for any financial losses.
             </div>
           </div>
         </div>
       </div>
-
-      <!-- Right Column: Live Data feed -->
-      <aside class="sidebar">
-        <!-- SIDEBAR AD -->
-        <div class="ad-banner ad-side">Sidebar Ad (250x250)</div>
-
-        <div class="card glass terminal-style">
-          <h3 class="widget-title">Live Global Feed</h3>
-          <div id="news-container">
-            <div class="loading-pulse">Establishing connection to node...</div>
-          </div>
-        </div>
-      </aside>
-
     </main>
   </div>
 
   <script type="module" src="dashboard.js"></script>
 </body>
-  </html>
+              </html>
