@@ -1,15 +1,14 @@
-// ================================================================
-//  Tradinoxaior — AI Trading Dashboard v4.0
-//  Gemini 2.5 Flash Vision + Tesseract OCR
-//  Real chart analysis — Entry, SL, TP, Risk Management
-// ================================================================
+// ══════════════════════════════════════════════════════
+//  Tradinoxaior — AI Dashboard Engine v4.1
+//  Strong OCR preprocessing + AI Vision combination
+// ══════════════════════════════════════════════════════
 
-import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// ── FIREBASE ─────────────────────────────────────────────────
-const firebaseConfig = {
+// ── FIREBASE ─────────────────────────────────────────
+const FB = {
   apiKey:"AIzaSyCX-lQnfA7mjt5P09TTw4Xn8hretwPPTrA",
   authDomain:"earncrypto-26d59.firebaseapp.com",
   projectId:"earncrypto-26d59",
@@ -17,447 +16,504 @@ const firebaseConfig = {
   messagingSenderId:"98622740161",
   appId:"1:98622740161:web:83e7ec5ed8c4b4046c2640"
 };
-
-const fbApp = initializeApp(firebaseConfig);
+const fbApp = initializeApp(FB);
 const auth  = getAuth(fbApp);
 const db    = getFirestore(fbApp);
 
-// ── GEMINI CONFIG ────────────────────────────────────────────
-const GEMINI_API_KEY = "AIzaSyDhKwfZ8H2T9Hcr0fMrc86o0NHFEQVZOZM";
-const GEMINI_MODEL   = "gemini-2.5-flash";   // Gemini 2.5 Flash — best vision + cheapest
-const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+// ── AI CONFIG (internal — not shown in UI) ────────────
+const _K  = "AIzaSyC8hjdJIJO-Nh2-sole2odN2sc6vHdO_MI";
+const _M  = "gemini-2.0-flash";
+const _EP = `https://generativelanguage.googleapis.com/v1beta/models/${_M}:generateContent?key=${_K}`;
 
-// ── AUTH GUARD ───────────────────────────────────────────────
-onAuthStateChanged(auth, async (user) => {
+// ── AUTH GUARD ────────────────────────────────────────
+onAuthStateChanged(auth, async user => {
   if (!user) {
-    const base = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
-    window.location.href = base + "/index.html";
+    window.location.href = 'index.html';
     return;
   }
   try {
-    const snap = await getDoc(doc(db, "users", user.uid));
-    document.getElementById("display-username").innerText =
-      snap.exists() ? snap.data().username : "Trader";
-  } catch(e) { console.error(e); }
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    const name = snap.exists() ? snap.data().username : user.displayName || 'Trader';
+    document.getElementById('display-username').textContent = name;
+  } catch(e) { console.warn(e); }
 });
 
-// ── DOM REFS ─────────────────────────────────────────────────
-const fileUpload       = document.getElementById("file-upload");
-const previewImage     = document.getElementById("preview-image");
-const previewWrapper   = document.getElementById("preview-wrapper");
-const uploadPlaceholder= document.getElementById("upload-placeholder");
-const btnAnalyze       = document.getElementById("btn-analyze");
-const statusContainer  = document.getElementById("ai-status-container");
-const terminalBody     = document.getElementById("terminal-body");
-const progressFill     = document.getElementById("progress-fill");
-const errorCard        = document.getElementById("error-card");
-const resultCard       = document.getElementById("result-card");
-const scannerLine      = document.getElementById("scanner-line");
-const engineStatus     = document.getElementById("engine-status");
+// ── DOM ───────────────────────────────────────────────
+const fileInput   = document.getElementById('file-input');
+const uploadZone  = document.getElementById('upload-zone');
+const uploadHint  = document.getElementById('upload-hint');
+const previewWrap = document.getElementById('preview-wrap');
+const previewImg  = document.getElementById('preview-img');
+const btnAnalyze  = document.getElementById('btn-analyze');
+const terminal    = document.getElementById('terminal');
+const termBody    = document.getElementById('term-body');
+const progBar     = document.getElementById('prog-bar');
+const errBox      = document.getElementById('err-box');
+const resultEl    = document.getElementById('result');
+const scanLine    = document.getElementById('scan-line');
+const engineSt    = document.getElementById('engine-status');
 
-let currentBase64   = null;
-let currentMimeType = "image/jpeg";
+let b64  = null;
+let mime = 'image/jpeg';
 
-// ── SETTINGS ─────────────────────────────────────────────────
-document.getElementById("btn-settings").addEventListener("click", () =>
-  document.getElementById("settings-menu").classList.toggle("hidden"));
+// ── SETTINGS ─────────────────────────────────────────
+document.getElementById('btn-settings').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('settings-menu').classList.toggle('hidden');
+});
+document.addEventListener('click', () =>
+  document.getElementById('settings-menu')?.classList.add('hidden'));
 
-document.getElementById("btn-logout").addEventListener("click", async () => {
+document.getElementById('btn-logout').addEventListener('click', async () => {
   await signOut(auth);
-  const base = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
-  window.location.href = base + "/index.html";
+  window.location.href = 'index.html';
 });
 
-document.getElementById("btn-theme").addEventListener("click", () =>
-  document.body.classList.toggle("light"));
-
-// Close settings on outside click
-document.addEventListener("click", (e) => {
-  if (!e.target.closest("#btn-settings") && !e.target.closest("#settings-menu"))
-    document.getElementById("settings-menu").classList.add("hidden");
+document.getElementById('btn-theme').addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  const btn = document.getElementById('btn-theme');
+  btn.textContent = document.body.classList.contains('dark') ? '☀ Light Mode' : '🌙 Dark Mode';
 });
 
-// ── FILE UPLOAD ──────────────────────────────────────────────
-fileUpload.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  currentMimeType = file.type || "image/jpeg";
-
+// ── FILE UPLOAD ───────────────────────────────────────
+fileInput.addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  mime = f.type || 'image/jpeg';
   const reader = new FileReader();
-  reader.onload = (ev) => {
-    const dataUrl    = ev.target.result;
-    currentBase64    = dataUrl.split(",")[1];
-    previewImage.src = dataUrl;
-    previewWrapper.style.display    = "block";
-    uploadPlaceholder.style.display = "none";
-    btnAnalyze.classList.remove("hidden");
-    errorCard.classList.add("hidden");
-    resultCard.classList.add("hidden");
-    log("Chart loaded ✓  Ready for Gemini AI analysis.");
-    statusContainer.classList.remove("hidden");
-    setProgress(5);
+  reader.onload = ev => {
+    const data = ev.target.result;
+    b64 = data.split(',')[1];
+    previewImg.src = data;
+    previewWrap.classList.remove('hidden');
+    uploadHint.style.display = 'none';
+    btnAnalyze.classList.remove('hidden');
+    errBox.classList.add('hidden');
+    resultEl.classList.add('hidden');
+    terminal.classList.remove('hidden');
+    termBody.innerHTML = '';
+    log('Chart loaded ✓ Ready to analyze.');
+    setP(5);
   };
-  reader.readAsDataURL(file);
+  reader.readAsDataURL(f);
 });
 
-// Drag & Drop
-const uploadContainer = document.getElementById("upload-container");
-uploadContainer.addEventListener("dragover", (e) => {
-  e.preventDefault(); uploadContainer.style.borderColor = "var(--accent)";
-});
-uploadContainer.addEventListener("dragleave", () => {
-  uploadContainer.style.borderColor = "";
-});
-uploadContainer.addEventListener("drop", (e) => {
-  e.preventDefault(); uploadContainer.style.borderColor = "";
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith("image/")) {
-    fileUpload.files = e.dataTransfer.files;
-    fileUpload.dispatchEvent(new Event("change"));
+// Drag & drop
+['dragover','dragenter'].forEach(ev =>
+  uploadZone.addEventListener(ev, e => { e.preventDefault(); uploadZone.classList.add('drag-over'); }));
+['dragleave','drop'].forEach(ev =>
+  uploadZone.addEventListener(ev, () => uploadZone.classList.remove('drag-over')));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
+  if (f?.type.startsWith('image/')) {
+    fileInput.files = e.dataTransfer.files;
+    fileInput.dispatchEvent(new Event('change'));
   }
 });
 
-// ── TERMINAL HELPERS ─────────────────────────────────────────
-function log(msg, type = "info") {
-  const cls = type === "warn" ? "log-warn" : type === "ok" ? "log-ok" : "";
-  terminalBody.innerHTML += `<p class="log-text ${cls}">> ${msg}</p>`;
-  terminalBody.scrollTop = terminalBody.scrollHeight;
+// ── HELPERS ───────────────────────────────────────────
+function log(msg, t='') {
+  const p = document.createElement('p');
+  p.className = 'tlog' + (t ? ' ' + t : '');
+  p.textContent = '> ' + msg;
+  termBody.appendChild(p);
+  termBody.scrollTop = termBody.scrollHeight;
 }
-function setProgress(pct) { progressFill.style.width = pct + "%"; }
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function setP(v) { progBar.style.width = v + '%'; }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-function showError(msg) {
-  document.getElementById("error-msg").textContent = msg;
-  errorCard.classList.remove("hidden");
-  scannerLine.style.display = "none";
-  engineStatus.textContent  = "ONLINE";
-  engineStatus.className    = "status-indicator live";
-  btnAnalyze.disabled       = false;
-  btnAnalyze.classList.remove("hidden");
-  btnAnalyze.textContent    = "⚡ RETRY ANALYSIS";
+function setErr(msg) {
+  document.getElementById('err-msg').textContent = msg;
+  errBox.classList.remove('hidden');
+  scanLine.style.display = 'none';
+  engineSt.className = 'engine-status';
+  engineSt.innerHTML = '<span class="st-dot"></span> Online';
+  btnAnalyze.disabled = false;
+  btnAnalyze.textContent = '⚡ Retry Analysis';
 }
 
-// ── OCR — EXTRACT TEXT FROM CHART ───────────────────────────
-async function runOCR(file) {
+// ── OCR PREPROCESSING ────────────────────────────────
+// Sharpen image on canvas before OCR for better accuracy
+function preprocessForOCR(imgEl) {
+  return new Promise(resolve => {
+    const canvas = document.createElement('canvas');
+    const ctx    = canvas.getContext('2d');
+    // Scale up for better OCR
+    canvas.width  = imgEl.naturalWidth  * 2 || 1200;
+    canvas.height = imgEl.naturalHeight * 2 || 900;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+
+    // Increase contrast for text
+    ctx.filter = 'contrast(1.4) brightness(1.1) saturate(0)';
+    ctx.drawImage(canvas, 0, 0);
+
+    canvas.toBlob(blob => resolve(blob), 'image/png', 1.0);
+  });
+}
+
+async function runOCR(imgEl) {
   try {
-    log("OCR engine scanning chart text...", "info");
-    const { data: { text } } = await Tesseract.recognize(file, 'eng', {
-      logger: () => {}
+    log('Running OCR text extraction...');
+    const blob = await preprocessForOCR(imgEl);
+    const { data: { text } } = await Tesseract.recognize(blob, 'eng', {
+      logger: () => {},
+      tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789./:-+%,. '
     });
-    log(`OCR extracted ${text.split('\n').filter(Boolean).length} lines ✓`, "ok");
-    return text.toUpperCase();
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 1);
+    log(`OCR: ${lines.length} lines extracted ✓`, 'ok');
+    return lines.join(' ').toUpperCase();
   } catch(e) {
-    log("OCR skipped (will use Gemini Vision only)", "warn");
-    return "";
+    log('OCR skipped — using AI vision only.', 'warn');
+    return '';
   }
 }
 
-// ── MASTER GEMINI PROMPT ─────────────────────────────────────
-function buildPrompt(ocrText) {
-  const ocrSection = ocrText.length > 20
-    ? `\n\nOCR Text extracted from this chart:\n"""\n${ocrText.slice(0, 800)}\n"""\nUse this to confirm asset name, price levels, and timeframe.`
-    : "";
+// ── PARSE OCR FOR CONTEXT ─────────────────────────────
+function parseOCR(text) {
+  const info = {};
+  // Timeframe
+  const tfMatch = text.match(/\b(1M|3M|5M|15M|30M|1H|2H|4H|6H|12H|1D|3D|1W)\b/);
+  if (tfMatch) info.timeframe = tfMatch[1];
+  // Price numbers
+  const nums = text.match(/\b\d{1,6}[.,]\d{2,5}\b/g);
+  if (nums?.length) info.priceHints = nums.slice(0,5).join(', ');
+  // Symbol hints
+  const symMatch = text.match(/\b(BTC|ETH|SOL|XRP|BNB|ADA|DOGE|MATIC|AVAX|LINK|EUR|GBP|USD|JPY|NIFTY|SENSEX|RELIANCE|TCS|AAPL|TSLA|GOLD|OIL)\b/g);
+  if (symMatch) info.symbols = [...new Set(symMatch)].join(', ');
+  return info;
+}
 
-  return `You are a world-class institutional trading analyst with 20+ years experience in:
-- Smart Money Concepts (SMC): Order Blocks, Fair Value Gaps, Liquidity Sweeps, Break of Structure
-- Wyckoff Method: Accumulation / Distribution
-- Technical Analysis: S/R levels, Chart Patterns, EMAs, RSI, MACD
-- Price Action & Candlestick analysis
+// ── MASTER AI PROMPT ─────────────────────────────────
+function buildPrompt(ocrText, ocrInfo) {
+  let context = '';
+  if (ocrInfo.timeframe) context += `\nTimeframe detected by OCR: ${ocrInfo.timeframe}`;
+  if (ocrInfo.priceHints) context += `\nPrice numbers from chart: ${ocrInfo.priceHints}`;
+  if (ocrInfo.symbols)    context += `\nSymbols/text found: ${ocrInfo.symbols}`;
+  if (ocrText.length > 30) context += `\n\nFull OCR text (use to confirm levels):\n"""\n${ocrText.slice(0,600)}\n"""`;
 
-You are analyzing a REAL trading chart screenshot. Study every detail carefully.${ocrSection}
+  return `You are an elite institutional trading analyst. Analyze this trading chart image carefully and provide a complete trade setup.
+${context}
 
-Respond with ONLY a valid JSON object — no markdown, no backticks, no extra text.
+Respond with ONLY valid JSON — no markdown, no backticks.
 
 {
   "isValidChart": true,
-  "asset": "detected symbol (e.g. BTC/USDT, EUR/USD, RELIANCE, NIFTY) or Unknown",
-  "marketType": "Cryptocurrency | Forex | Equities/Stocks | Indices | Commodities | Unknown",
-  "timeframe": "e.g. 15m, 1H, 4H, 1D or Unknown",
-  "currentPrice": "exact price shown on chart or N/A",
+  "asset": "symbol (e.g. BTC/USDT, RELIANCE, EUR/USD, NIFTY)",
+  "marketType": "Crypto | Forex | Stocks | Indices | Commodities",
+  "timeframe": "detected timeframe",
+  "currentPrice": "exact price from chart or approximate",
   "signal": "LONG | SHORT | NEUTRAL",
-  "trend": "e.g. STRONG BULLISH MOMENTUM | BEARISH DISTRIBUTION | SIDEWAYS CONSOLIDATION",
+  "trend": "e.g. STRONG BULLISH | BEARISH REVERSAL | SIDEWAYS",
   "confidence": 75,
-
-  "entryZone": "specific price or zone to enter the trade",
-  "entryNote": "e.g. Wait for 15m candle close above OB | Enter on retest",
-  "stopLoss": "specific price level for stop loss",
-  "stopLossNote": "e.g. Below Order Block | Below recent swing low",
-  "takeProfit1": "first target price",
-  "rr1": "e.g. 1:2.5",
-  "takeProfit2": "second (extended) target price",
-  "rr2": "e.g. 1:4.0",
-
+  "strategy": "SMC | Price Action | Breakout | Wyckoff",
+  "patternDetected": "chart pattern or None",
+  "entryZone": "specific price for entry",
+  "entryNote": "e.g. Enter on 15m candle close above OB",
+  "stopLoss": "stop loss price",
+  "stopLossNote": "e.g. Below Order Block / Swing Low",
+  "takeProfit1": "first target",
+  "rr1": "e.g. 1:2",
+  "takeProfit2": "second target",
+  "rr2": "e.g. 1:3.5",
   "support": "key support level",
   "resistance": "key resistance level",
-
-  "orderBlocks": "describe bullish/bearish OBs visible — location and mitigation status",
-  "fairValueGap": "describe any FVGs or imbalances — price and direction",
-  "liquidityZones": "describe buy-side/sell-side liquidity pools and any sweeps",
-  "patternDetected": "main chart pattern detected (Bull Flag, Double Top, H&S, etc) or None",
-
-  "institutionalAnalysis": "4-6 sentence breakdown: What is smart money doing? What is the key level? What is the trade bias and why? What should trader watch for?",
-
-  "howToTrade": "Step-by-step: 1) Wait for X... 2) Enter at X when... 3) Place SL at X... 4) First target at X... 5) Move SL to BE at...",
-
-  "rrRatio": "best risk:reward ratio e.g. 1:3.5",
+  "orderBlocks": "describe OBs — location and status",
+  "fairValueGap": "describe FVGs visible",
+  "liquidityZones": "buy/sell side pools and sweeps",
+  "institutionalAnalysis": "4-5 sentences: what smart money is doing, key context, bias, what to watch",
+  "howToTrade": "Step 1: Wait for X. Step 2: Enter at X when Y. Step 3: SL at X. Step 4: TP1 at X. Step 5: Move SL to breakeven when.",
+  "rrRatio": "best R:R e.g. 1:3",
   "tradeValidity": "Strong Setup | Moderate Setup | Weak Setup | No Trade",
-  "riskWarning": "specific invalidation condition for this trade",
-
-  "strategy": "SMC | Wyckoff | Price Action | Breakout | Reversal"
+  "riskWarning": "specific invalidation condition"
 }
 
 Rules:
-- isValidChart = false if no price chart is visible
-- Be SPECIFIC with actual price levels from the chart
-- confidence: number 45-95 based on setup quality
-- If price is not readable, say approximate or relative (e.g. near 0.618 fib)
-- NEVER make up data — if unsure write "Not clearly visible"`;
+- isValidChart = false if image has no chart/price data
+- Be specific with price levels from the chart
+- confidence: integer 45-95
+- If unsure about a field write "Not clearly visible"`;
 }
 
-// ── MAIN ANALYSIS ENGINE ─────────────────────────────────────
-btnAnalyze.addEventListener("click", async () => {
-  if (!currentBase64) return;
-
-  // Reset
+// ── MAIN ANALYSIS ─────────────────────────────────────
+btnAnalyze.addEventListener('click', async () => {
+  if (!b64) return;
   btnAnalyze.disabled = true;
-  btnAnalyze.classList.add("hidden");
-  errorCard.classList.add("hidden");
-  resultCard.classList.add("hidden");
-  statusContainer.classList.remove("hidden");
-  terminalBody.innerHTML = "";
-  scannerLine.style.display = "block";
-  engineStatus.textContent  = "SCANNING";
-  engineStatus.className    = "status-indicator processing";
+  btnAnalyze.textContent = 'Analyzing...';
+  errBox.classList.add('hidden');
+  resultEl.classList.add('hidden');
+  terminal.classList.remove('hidden');
+  termBody.innerHTML = '';
+  scanLine.style.display = 'block';
+  engineSt.className = 'engine-status processing';
+  engineSt.innerHTML = '<span class="st-dot"></span> Scanning';
+  setP(0);
 
-  setProgress(5);
-  log("Tradinoxaior AI Engine initializing...");
+  log('Tradinoxaior AI initializing...');
   await sleep(300);
+  setP(10);
 
-  // Step 1 — OCR
-  setProgress(20);
-  const ocrText = await runOCR(
-    fileUpload.files[0] || await (await fetch(previewImage.src)).blob()
-  );
+  // Step 1: OCR
+  const ocrText = await runOCR(previewImg);
+  const ocrInfo = parseOCR(ocrText);
+  setP(30);
+  await sleep(200);
 
-  // Detect from OCR
-  const tf = ocrText.match(/\b(1M|3M|5M|15M|30M|1H|2H|4H|6H|12H|1D|1W|15m|5m|1h|4h|1d)\b/i);
-  if (tf) log(`Timeframe detected by OCR: ${tf[0].toUpperCase()}`, "ok");
-
-  // Step 2 — Send to Gemini
-  setProgress(40);
-  log("Sending chart to Gemini 2.5 Flash Vision...", "warn");
-  log("AI is reading candlesticks, price levels, patterns...");
+  // Step 2: AI Analysis
+  log('Sending to AI Vision engine...');
+  log('Reading candlesticks and price structure...');
+  setP(45);
 
   try {
-    const payload = {
+    const body = {
       contents: [{
         parts: [
-          {
-            inline_data: {
-              mime_type: currentMimeType,
-              data: currentBase64
-            }
-          },
-          { text: buildPrompt(ocrText) }
+          { inline_data: { mime_type: mime, data: b64 } },
+          { text: buildPrompt(ocrText, ocrInfo) }
         ]
       }],
       generationConfig: {
-        temperature:     0.2,
-        maxOutputTokens: 2000,
-        responseMimeType:"application/json"
-      }
+        temperature: 0.15,
+        maxOutputTokens: 2048,
+      },
+      safetySettings: [
+        { category: 'HARM_CATEGORY_HARASSMENT',         threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH',         threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',   threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT',   threshold: 'BLOCK_NONE' },
+      ]
     };
 
-    const response = await fetch(GEMINI_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+    const res = await fetch(_EP, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
 
-    setProgress(75);
+    setP(75);
 
-    if (!response.ok) {
-      const err = await response.json().catch(()=>({}));
-      const msg = err?.error?.message || `HTTP ${response.status}`;
-      if (response.status === 400) throw new Error("Invalid request. Try a clearer chart image.");
-      if (response.status === 403) throw new Error("API key invalid or expired.");
-      throw new Error(msg);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      const msg = err?.error?.message || '';
+      if (res.status === 400) throw new Error('Could not process this image. Please try a clearer chart screenshot.');
+      if (res.status === 403 || res.status === 401) throw new Error('AI service authentication failed. Please contact support.');
+      if (res.status === 429) throw new Error('Too many requests. Please wait a moment and try again.');
+      throw new Error(msg || `Service error (${res.status}). Please try again.`);
     }
 
-    const data    = await response.json();
-    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    if (!rawText) throw new Error("Gemini returned empty response. Try again.");
+    const data = await res.json();
 
-    log("Gemini AI analysis complete ✓", "ok");
-    setProgress(90);
+    // Extract text content
+    const rawText = data?.candidates?.[0]?.content?.parts
+      ?.filter(p => p.text)
+      ?.map(p => p.text)
+      ?.join('') || '';
 
-    // Parse JSON — strip any accidental markdown
-    const clean  = rawText.replace(/```json\s*/gi,"").replace(/```\s*/g,"").trim();
+    if (!rawText) throw new Error('AI returned an empty response. Please try again.');
+
+    // Safety: check for blocked content
+    const reason = data?.candidates?.[0]?.finishReason;
+    if (reason === 'SAFETY') throw new Error('Image could not be processed. Please use a standard trading chart screenshot.');
+
+    setP(88);
+    log('AI analysis complete ✓', 'ok');
+    log('Parsing trade setup...');
+
+    // Clean JSON — strip any accidental markdown fences
+    let clean = rawText
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/```\s*$/i, '')
+      .trim();
+
+    // Extract JSON if mixed with text
+    const jsonMatch = clean.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('AI response was not valid. Please try again.');
+    clean = jsonMatch[0];
+
     const result = JSON.parse(clean);
+    setP(100);
+    await sleep(400);
 
-    setProgress(100);
-    await sleep(500);
-
-    scannerLine.style.display = "none";
-    statusContainer.classList.add("hidden");
-    engineStatus.textContent  = "ONLINE";
-    engineStatus.className    = "status-indicator live";
-    btnAnalyze.disabled       = false;
-    btnAnalyze.classList.remove("hidden");
-    btnAnalyze.textContent    = "⚡ RE-ANALYZE CHART";
+    scanLine.style.display = 'none';
+    terminal.classList.add('hidden');
+    engineSt.className = 'engine-status';
+    engineSt.innerHTML = '<span class="st-dot"></span> Online';
+    btnAnalyze.disabled = false;
+    btnAnalyze.textContent = '⚡ Re-analyze';
 
     if (!result.isValidChart) {
-      showError("Gemini could not detect valid chart data. Please upload a clear trading chart.");
+      setErr('No valid chart detected. Please upload a clear trading chart screenshot (candlestick or line chart).');
       return;
     }
 
-    renderResults(result);
+    renderResult(result);
 
-  } catch(err) {
-    console.error("Analysis error:", err);
-    scannerLine.style.display = "none";
-    statusContainer.classList.add("hidden");
+  } catch(e) {
+    console.error(e);
+    scanLine.style.display = 'none';
+    terminal.classList.add('hidden');
+    engineSt.className = 'engine-status';
+    engineSt.innerHTML = '<span class="st-dot"></span> Online';
     btnAnalyze.disabled = false;
-    showError("Analysis failed: " + err.message);
+    btnAnalyze.textContent = '⚡ Retry Analysis';
+    setErr(e.message || 'Analysis failed. Please try again.');
   }
 });
 
-// ── RENDER RESULTS ───────────────────────────────────────────
-function renderResults(r) {
+// ── RENDER ────────────────────────────────────────────
+function txt(id, v) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = v || '--';
+}
 
-  // Signal badge
-  const badge = document.getElementById("res-signal");
-  badge.textContent = r.signal || "NEUTRAL";
-  badge.className   = `signal-badge signal-${r.signal || "NEUTRAL"}`;
+function renderResult(r) {
+  // Signal
+  const sig = document.getElementById('r-signal');
+  sig.textContent = r.signal || 'NEUTRAL';
+  sig.className   = 'sig-badge ' + (r.signal || 'NEUTRAL').toLowerCase();
 
-  // Confidence bar
+  // Confidence
   const conf = parseInt(r.confidence) || 0;
-  document.getElementById("conf-fill").style.width = conf + "%";
-  document.getElementById("conf-fill").style.background =
-    conf >= 75 ? "var(--green)" : conf >= 60 ? "var(--yellow)" : "var(--red)";
+  const cfEl  = document.getElementById('conf-fill');
+  cfEl.style.width      = conf + '%';
+  cfEl.style.background = conf >= 75 ? '#16a34a' : conf >= 55 ? '#d97706' : '#ef4444';
 
-  // Text fields
-  set("res-trend",       r.trend        || "--");
-  set("res-asset",       r.asset        || "Unknown");
-  set("res-market",      r.marketType   || "--");
-  set("res-timeframe",   r.timeframe    || "--");
-  set("res-strategy",    r.strategy     || "--");
-  set("res-confidence",  (r.confidence  || "--") + "%");
+  txt('r-trend',   r.trend);
+  txt('r-asset',   r.asset);
+  txt('r-tf',      r.timeframe);
+  txt('r-market',  r.marketType);
+  txt('r-conf',    conf + '%');
 
-  // Trade setup
-  set("res-entry",       r.entryZone    || "N/A");
-  set("res-entry-note",  r.entryNote    || "");
-  set("res-sl",          r.stopLoss     || "N/A");
-  set("res-sl-note",     r.stopLossNote || "");
-  set("res-tp1",         r.takeProfit1  || "N/A");
-  set("res-rr1",         `R:R ${r.rr1  || "--"}`);
-  set("res-tp2",         r.takeProfit2  || "N/A");
-  set("res-rr2",         `R:R ${r.rr2  || "--"}`);
+  txt('r-entry',      r.entryZone);
+  txt('r-entry-note', r.entryNote);
+  txt('r-sl',         r.stopLoss);
+  txt('r-sl-note',    r.stopLossNote);
+  txt('r-tp1',        r.takeProfit1);
+  txt('r-rr1',        r.rr1 ? 'R:R ' + r.rr1 : '--');
+  txt('r-tp2',        r.takeProfit2);
+  txt('r-rr2',        r.rr2 ? 'R:R ' + r.rr2 : '--');
 
-  // Levels
-  set("res-support",     r.support      || "N/A");
-  set("res-price",       r.currentPrice || "N/A");
-  set("res-resistance",  r.resistance   || "N/A");
+  txt('r-support',  r.support);
+  txt('r-price',    r.currentPrice);
+  txt('r-resist',   r.resistance);
 
-  // SMC
-  set("res-ob",          r.orderBlocks     || "Not clearly visible");
-  set("res-fvg",         r.fairValueGap    || "Not clearly visible");
-  set("res-liq",         r.liquidityZones  || "Not clearly visible");
-  set("res-pattern",     r.patternDetected || "None detected");
+  txt('r-ob',       r.orderBlocks);
+  txt('r-fvg',      r.fairValueGap);
+  txt('r-liq',      r.liquidityZones);
+  txt('r-pattern',  r.patternDetected);
+  txt('r-strategy', r.strategy);
 
-  // Analysis
-  set("res-reason",      r.institutionalAnalysis || "--");
+  txt('r-analysis', r.institutionalAnalysis);
+  txt('r-rr',       r.rrRatio);
+  txt('r-risk',     r.riskWarning);
 
-  // How to trade
-  const howBox = document.getElementById("res-how");
-  if (r.howToTrade) {
-    howBox.innerHTML = r.howToTrade
-      .split(/\d+\)/)
-      .filter(Boolean)
-      .map((step, i) => `<div class="how-step"><span class="step-num">${i+1}</span><p>${step.trim()}</p></div>`)
-      .join("");
-  } else {
-    howBox.innerHTML = "<p>See institutional analysis above for trade guidance.</p>";
+  // Quality color
+  const qEl = document.getElementById('r-quality');
+  if (qEl) {
+    qEl.textContent = r.tradeValidity || '--';
+    qEl.style.color = r.tradeValidity?.includes('Strong')   ? '#16a34a'
+                    : r.tradeValidity?.includes('Moderate') ? '#d97706'
+                    : '#ef4444';
   }
 
-  // Risk
-  set("res-rr",       r.rrRatio      || "N/A");
-  set("res-validity", r.tradeValidity|| "N/A");
-  set("res-risk",     r.riskWarning  || "Apply strict risk management.");
+  // How to trade — numbered steps
+  const howEl = document.getElementById('r-how');
+  if (howEl && r.howToTrade) {
+    const steps = r.howToTrade
+      .split(/Step\s*\d+:\s*/i)
+      .map(s => s.trim())
+      .filter(Boolean);
+    if (steps.length > 1) {
+      howEl.innerHTML = steps.map((s,i) =>
+        `<div class="how-step"><span class="step-n">${i+1}</span><p>${s}</p></div>`
+      ).join('');
+    } else {
+      howEl.innerHTML = `<p class="how-plain">${r.howToTrade}</p>`;
+    }
+  }
 
-  // Trade validity colour
-  const valEl = document.getElementById("res-validity");
-  if (r.tradeValidity?.includes("Strong"))   valEl.style.color = "var(--green)";
-  else if (r.tradeValidity?.includes("Moderate")) valEl.style.color = "var(--yellow)";
-  else valEl.style.color = "var(--red)";
-
-  resultCard.classList.remove("hidden");
-  resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  resultEl.classList.remove('hidden');
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function set(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
+// ── TICKER ────────────────────────────────────────────
+const TICKERS = [
+  {s:'BTC/USD',p:'94,230',c:'+2.4%',u:true},{s:'ETH/USD',p:'3,810',c:'+1.8%',u:true},
+  {s:'SOL/USD',p:'182.4', c:'-0.9%',u:false},{s:'EUR/USD',p:'1.0854',c:'+0.1%',u:true},
+  {s:'NIFTY',  p:'24,180',c:'+0.8%',u:true}, {s:'GOLD',   p:'2,385', c:'+0.3%',u:true},
+  {s:'XRP/USD',p:'0.582', c:'+3.1%',u:true}, {s:'BNB/USD',p:'612.1', c:'+0.5%',u:true},
+];
+function buildTicker() {
+  const el  = document.getElementById('top-ticker');
+  if (!el) return;
+  const arr = [...TICKERS,...TICKERS];
+  el.innerHTML = arr.map(t =>
+    `<span class="t-chip">
+       <span class="t-s">${t.s}</span>
+       <span class="t-p">${t.p}</span>
+       <span class="${t.u?'t-u':'t-d'}">${t.c}</span>
+     </span>`
+  ).join('');
 }
+buildTicker();
 
-// ── NEWS FEED ────────────────────────────────────────────────
+// ── NEWS ──────────────────────────────────────────────
 async function fetchNews() {
-  const el  = document.getElementById("news-container");
+  const el = document.getElementById('news-feed');
   const fallback = [
-    { title:"Bitcoin Whale Accumulation Near Key Support Zone", source:"On-Chain Analytics", url:"#" },
-    { title:"Fed Rate Decision Impact on Global Markets", source:"Macro Finance", url:"#" },
-    { title:"Institutional DeFi Inflows Surge This Quarter", source:"Crypto Daily", url:"#" },
-    { title:"DXY Index Faces Resistance at Technical Level", source:"FX Street", url:"#" },
-    { title:"Nifty 50 Tests All-Time High — What Next?", source:"Market Watch India", url:"#" }
+    {title:'BTC Whales Accumulating Near Key Support', src:'On-Chain Analytics'},
+    {title:'Fed Rate Decision — Markets On Alert',     src:'Macro Finance'},
+    {title:'Nifty 50 Tests All-Time High Zone',        src:'Market Watch India'},
+    {title:'EUR/USD Holds Above 1.08 After NFP Data',  src:'FX Street'},
+    {title:'Gold Rallies on Dollar Weakness',          src:'Commodities Daily'},
   ];
   try {
-    const res  = await fetch("https://min-api.cryptocompare.com/data/v2/news/?lang=EN", { cache:"no-store" });
-    const data = await res.json();
-    if (!data.Data?.length) throw new Error();
-    el.innerHTML = data.Data.slice(0,6).map(a=>`
-      <div class="news-item">
-        <a href="${a.url}" target="_blank" class="news-title">${a.title}</a>
-        <span class="news-meta">${a.source_info.name} · ${new Date(a.published_on*1000).toLocaleTimeString()}</span>
-      </div>`).join("");
+    const r = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN', {cache:'no-store'});
+    const d = await r.json();
+    if (!d.Data?.length) throw 0;
+    el.innerHTML = d.Data.slice(0,6).map(a =>
+      `<a class="news-link" href="${a.url}" target="_blank">
+         <span class="news-src">${a.source_info?.name || ''}</span>
+         <span class="news-ttl">${a.title}</span>
+       </a>`
+    ).join('');
   } catch {
-    el.innerHTML = fallback.map(a=>`
-      <div class="news-item">
-        <a href="${a.url}" class="news-title">${a.title}</a>
-        <span class="news-meta">${a.source}</span>
-      </div>`).join("");
+    el.innerHTML = fallback.map(f =>
+      `<div class="news-link">
+         <span class="news-src">${f.src}</span>
+         <span class="news-ttl">${f.title}</span>
+       </div>`
+    ).join('');
   }
 }
-
-// ── MARKET SESSIONS ──────────────────────────────────────────
-function renderSessions() {
-  const now   = new Date();
-  const utcH  = now.getUTCHours();
-  const utcM  = now.getUTCMinutes();
-  const utcNow= utcH * 60 + utcM;
-
-  const sessions = [
-    { name:"Tokyo",    start:0,  end:9,  color:"#f472b6" },
-    { name:"London",   start:8,  end:17, color:"#60a5fa" },
-    { name:"New York", start:13, end:22, color:"#34d399" },
-    { name:"Sydney",   start:22, end:7,  color:"#a78bfa" }
-  ];
-
-  const el = document.getElementById("sessions-container");
-  el.innerHTML = sessions.map(s => {
-    const sm  = s.start * 60, em = s.end * 60;
-    const on  = s.start < s.end ? utcNow>=sm && utcNow<em : utcNow>=sm || utcNow<em;
-    return `<div class="session-item" style="border-color:${on?s.color+'44':''}">
-      <span class="sess-name" style="color:${s.color}">${s.name}</span>
-      <span class="sess-time">${pad(s.start)}:00–${pad(s.end)}:00 UTC</span>
-      <span class="sess-status ${on?'open':'closed'}">${on?'● OPEN':'○ CLOSED'}</span>
-    </div>`;
-  }).join("");
-}
-
-function pad(n) { return String(n).padStart(2,"0"); }
-
-// ── INIT ─────────────────────────────────────────────────────
 fetchNews();
+
+// ── SESSIONS ──────────────────────────────────────────
+function renderSessions() {
+  const now  = new Date();
+  const utcM = now.getUTCHours()*60 + now.getUTCMinutes();
+  const SESS = [
+    {n:'Tokyo',   s:0,  e:9,  c:'#f59e0b'},
+    {n:'London',  s:8,  e:17, c:'#3b82f6'},
+    {n:'New York',s:13, e:22, c:'#22c55e'},
+    {n:'Sydney',  s:22, e:7,  c:'#a855f7'},
+  ];
+  const el = document.getElementById('sessions');
+  if (!el) return;
+  el.innerHTML = SESS.map(s => {
+    const sm=s.s*60, em=s.e*60;
+    const on = s.s<s.e ? utcM>=sm&&utcM<em : utcM>=sm||utcM<em;
+    return `<div class="sess-item">
+      <span class="sess-dot" style="background:${s.c};box-shadow:0 0 6px ${s.c}40"></span>
+      <span class="sess-name">${s.n}</span>
+      <span class="sess-time">${pad(s.s)}:00–${pad(s.e)}:00</span>
+      <span class="sess-tag ${on?'open':'closed'}">${on?'OPEN':'CLOSED'}</span>
+    </div>`;
+  }).join('');
+}
+function pad(n){return String(n).padStart(2,'0');}
 renderSessions();
-setInterval(renderSessions, 60_000);
-                              
+setInterval(renderSessions, 60000);
+  
