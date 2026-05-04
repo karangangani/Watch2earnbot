@@ -3,41 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TradeNox AI - Institutional Dashboard</title>
+  <title>TradeNox AI - Dashboard</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Tesseract is REMOVED. We are using pure Gemini AI now. -->
 </head>
 <body>
   
   <header class="topbar">
     <div class="logo">
-      <span class="pulse-dot"></span> TradeNox Core <span class="badge-pro">PRO AI</span>
+      <span class="pulse-dot"></span> TradeNox <span class="badge-pro">CORE AI</span>
     </div>
     <div class="topbar-right">
       <span class="user-greeting">Welcome, <span id="display-username">Trader</span></span>
-      <button id="btn-settings" class="icon-btn">⚙️</button>
-      <div id="settings-menu" class="settings-dropdown glass hidden">
-        <button id="btn-logout" class="btn secondary danger-btn">🚪 Terminate Session</button>
-      </div>
+      <button id="btn-logout" class="btn secondary danger-btn" style="padding: 6px 12px; font-size: 12px;">Logout</button>
     </div>
   </header>
 
   <div class="dashboard-container">
     <main class="dashboard-grid">
-      
       <div class="main-content">
         <div class="card glass">
           <div class="card-header">
-            <h2>Gemini Vision Neural Scan</h2>
-            <span class="status-indicator live">GEMINI ONLINE</span>
+            <h2>Neural Chart Processing</h2>
+            <span class="status-indicator live">ENGINE ONLINE</span>
           </div>
-          <p class="subtitle">Upload chart. AI will analyze structure and provide specific entry zones.</p>
+          <p class="subtitle">Upload chart. AI will analyze structure and provide execution zones.</p>
           
           <label class="upload-area" id="upload-container">
             <div id="upload-placeholder">
               <div class="upload-icon-container"><span class="upload-icon">⛬</span></div>
               <p class="upload-title">INITIALIZE SCAN</p>
-              <p class="subtitle">Drop high-resolution chart (PNG/JPG)</p>
             </div>
             
             <div class="image-preview-wrapper" id="preview-wrapper">
@@ -51,7 +45,7 @@
           
           <div id="ai-status-container" class="terminal-box hidden">
             <div class="terminal-header">
-              <span>Gemini Engine</span>
+              <span>TradeNox Terminal</span>
             </div>
             <div class="terminal-body" id="terminal-body">
               <p class="log-text">> Awaiting input...</p>
@@ -60,8 +54,8 @@
           </div>
 
           <div id="error-card" class="error-card hidden">
-            <h3>CRITICAL ERROR</h3>
-            <p>Vision API failed to analyze the chart. Please try again.</p>
+            <h3>ANALYSIS FAILED</h3>
+            <p id="error-msg">Neural engine could not process the chart. Try again.</p>
           </div>
 
           <!-- AI RESULT CARD -->
@@ -74,41 +68,24 @@
               <span id="res-signal" class="signal-badge">--</span>
             </div>
             
-            <!-- NEW: ENTRY / SL / TP GRID -->
             <div class="execution-grid">
               <div class="exec-box entry-box">
-                <span class="exec-label">ENTRY POINT</span>
+                <span class="exec-label">ENTRY ZONE</span>
                 <span class="exec-value" id="res-entry">--</span>
               </div>
               <div class="exec-box stop-box">
-                <span class="exec-label">STOP LOSS (SL)</span>
+                <span class="exec-label">STOP LOSS</span>
                 <span class="exec-value" id="res-sl">--</span>
               </div>
               <div class="exec-box target-box">
-                <span class="exec-label">TAKE PROFIT (TP)</span>
+                <span class="exec-label">TAKE PROFIT</span>
                 <span class="exec-value" id="res-tp">--</span>
               </div>
             </div>
 
-            <div class="data-grid" style="margin-top: 15px;">
-              <div class="data-cell">
-                <span class="cell-label">AI CONFIDENCE</span>
-                <span class="cell-value text-green" id="res-confidence">--</span>
-              </div>
-              <div class="data-cell">
-                <span class="cell-label">PRIMARY MODEL</span>
-                <span class="cell-value highlight-blue" id="res-strategy">--</span>
-              </div>
-            </div>
-
-            <div class="analysis-box">
-              <span class="cell-label">INSTITUTIONAL BREAKDOWN</span>
+            <div class="analysis-box" style="margin-top: 20px;">
+              <span class="cell-label">LOGIC & REASONING</span>
               <p id="res-reason" class="analysis-text">...</p>
-            </div>
-            
-            <!-- LEGAL DISCLAIMER -->
-            <div class="legal-disclaimer">
-              <strong>⚠️ DISCLAIMER:</strong> This AI generates estimates based on chart patterns. These are NOT 100% perfect trading signals. Cryptocurrency and Forex trading involve high risk. Manage your own risk. Do not trade money you cannot afford to lose. TradeNox AI is not liable for any financial losses.
             </div>
           </div>
         </div>
@@ -118,4 +95,4 @@
 
   <script type="module" src="dashboard.js"></script>
 </body>
-              </html>
+  </html>
