@@ -1,90 +1,103 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { 
-  getAuth, setPersistence, browserLocalPersistence, 
-  createUserWithEmailAndPassword, signInWithEmailAndPassword, 
-  GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, 
-  onAuthStateChanged 
+import {
+  getAuth, setPersistence, browserLocalPersistence,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// ── FIREBASE CONFIG ──────────────────────────────────────────
 const firebaseConfig = {
-  apiKey: "AIzaSyCX-lQnfA7mjt5P09TTw4Xn8hretwPPTrA",
-  authDomain: "earncrypto-26d59.firebaseapp.com",
-  projectId: "earncrypto-26d59",
-  storageBucket: "earncrypto-26d59.firebasestorage.app",
+  apiKey:            "AIzaSyCX-lQnfA7mjt5P09TTw4Xn8hretwPPTrA",
+  authDomain:        "earncrypto-26d59.firebaseapp.com",
+  projectId:         "earncrypto-26d59",
+  storageBucket:     "earncrypto-26d59.firebasestorage.app",
   messagingSenderId: "98622740161",
-  appId: "1:98622740161:web:83e7ec5ed8c4b4046c2640",
-  measurementId: "G-SSHSZ2TZBP"
+  appId:             "1:98622740161:web:83e7ec5ed8c4b4046c2640"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const app      = initializeApp(firebaseConfig);
+const auth     = getAuth(app);
+const db       = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// Force persistence
 setPersistence(auth, browserLocalPersistence);
 
-// Dashboard Redirect Helper
+// ── REDIRECT ─────────────────────────────────────────────────
 const goToDashboard = () => {
-  // Yeh line GitHub Pages aur local dono par kaam karegi
-  const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
-  window.location.href = path + "/dashboard.html";
+  const base = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+  window.location.href = base + "/dashboard.html";
 };
 
-// Global Auth Observer
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("User is logged in, redirecting...");
-    goToDashboard();
-  }
-});
+onAuthStateChanged(auth, (user) => { if (user) goToDashboard(); });
 
-const getVal = (id) => document.getElementById(id).value.trim();
+// ── HELPERS ──────────────────────────────────────────────────
+const getVal = (id) => document.getElementById(id)?.value?.trim() || '';
+const toast  = (msg, color) => typeof showToast === 'function' && showToast(msg, color);
 
-async function saveUserToFirestore(user, customUsername) {
-  const username = customUsername || user.displayName || user.email.split("@")[0];
-  await setDoc(doc(db, "users", user.uid), {
-    uid: user.uid,
-    email: user.email,
-    username: username,
-    createdAt: serverTimestamp()
+async function saveUser(user, username) {
+  const uname = username || user.displayName || user.email.split('@')[0];
+  await setDoc(doc(db, 'users', user.uid), {
+    uid: user.uid, email: user.email,
+    username: uname, createdAt: serverTimestamp(),
+    plan: 'free', analyses_today: 0
   }, { merge: true });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  
-  // SIGN UP
-  document.getElementById("btn-signup")?.addEventListener("click", async () => {
-    const email = getVal("email");
-    const password = getVal("password");
-    const username = getVal("username");
+// ── SIGN IN ──────────────────────────────────────────────────
+document.getElementById('btn-signin')?.addEventListener('click', async () => {
+  const email = getVal('si-email');
+  const pass  = getVal('si-password');
+  if (!email || !pass) { toast('⚠ Please fill all fields', '#f59e0b'); return; }
+  try {
+    toast('Signing in...', '#3b82f6');
+    await signInWithEmailAndPassword(auth, email, pass);
+    goToDashboard();
+  } catch (e) {
+    const msg = e.code === 'auth/invalid-credential' ? 'Invalid email or password' : e.message;
+    toast('❌ ' + msg, '#ef4444');
+  }
+});
 
-    if (!email || !password || !username) return alert("All fields are required!");
+// ── SIGN UP ──────────────────────────────────────────────────
+document.getElementById('btn-signup')?.addEventListener('click', async () => {
+  const username = getVal('su-username');
+  const email    = getVal('su-email');
+  const pass     = getVal('su-password');
+  if (!username || !email || !pass) { toast('⚠ All fields required', '#f59e0b'); return; }
+  if (pass.length < 6) { toast('⚠ Password min 6 characters', '#f59e0b'); return; }
+  try {
+    toast('Creating account...', '#3b82f6');
+    const res = await createUserWithEmailAndPassword(auth, email, pass);
+    await saveUser(res.user, username);
+    goToDashboard();
+  } catch (e) {
+    const msg = e.code === 'auth/email-already-in-use' ? 'Email already registered' : e.message;
+    toast('❌ ' + msg, '#ef4444');
+  }
+});
 
-    try {
-      const res = await createUserWithEmailAndPassword(auth, email, password);
-      await saveUserToFirestore(res.user, username);
-      goToDashboard();
-    } catch (e) { alert(e.message); }
-  });
+// ── GOOGLE ───────────────────────────────────────────────────
+document.getElementById('btn-google')?.addEventListener('click', async () => {
+  try {
+    toast('Opening Google...', '#3b82f6');
+    const result = await signInWithPopup(auth, provider);
+    await saveUser(result.user, null);
+    goToDashboard();
+  } catch (e) {
+    toast('❌ Google Error: ' + e.message, '#ef4444');
+  }
+});
 
-  // LOGIN
-  document.getElementById("btn-login")?.addEventListener("click", async () => {
-    const email = getVal("email");
-    const password = getVal("password");
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      goToDashboard();
-    } catch (e) { alert("Login Failed: " + e.message); }
-  });
-
-  // GOOGLE LOGIN (Optimized for Mobile)
-  document.getElementById("btn-google")?.addEventListener("click", async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      await saveUserToFirestore(result.user, null);
-      goToDashboard();
-    } catch (e) { alert("Google Error: " + e.message); }
-  });
+// ── FORGOT PASSWORD ──────────────────────────────────────────
+document.getElementById('btn-forgot')?.addEventListener('click', async () => {
+  const email = getVal('si-email');
+  if (!email) { toast('⚠ Enter your email first', '#f59e0b'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    toast('✅ Reset email sent! Check inbox.', '#22c55e');
+  } catch (e) {
+    toast('❌ ' + e.message, '#ef4444');
+  }
 });
