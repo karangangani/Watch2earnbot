@@ -9,25 +9,20 @@ import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10
 
 // ── FIREBASE ─────────────────────────────────────────
 // Paste your own Firebase config here
+// Firebase key alag rakho
 const FB = {
-  apiKey:"AIzaSyCX-lQnfA7mjt5P09TTw4Xn8hretwPPTrA",
-  authDomain:"earncrypto-26d59.firebaseapp.com",
-  projectId:"earncrypto-26d59",
-  storageBucket:"earncrypto-26d59.firebasestorage.app",
-  messagingSenderId:"98622740161",
-  appId:"1:98622740161:web:83e7ec5ed8c4b4046c2640"
+  apiKey: "AIzaSyCX-lQnfA7mjt5P09TTw4Xn8hretwPPTrA",
+  authDomain: "earncrypto-26d59.firebaseapp.com",
+  projectId: "earncrypto-26d59",
+  storageBucket: "earncrypto-26d59.firebasestorage.app",
+  messagingSenderId: "98622740161",
+  appId: "1:98622740161:web:83e7ec5ed8c4b4046c2640"
 };
 
-const fbApp = initializeApp(FB);
-const auth = getAuth(fbApp);
-const db = getFirestore(fbApp);
-
-// ── AI CONFIG ────────────────────────────────────────
-// Paste your Gemini API key here for testing
-const _K  = "AIzaSyC8hjdJIJO-Nh2-sole2odN2sc6vHdO_MI";
-const _M  = "gemini-2.0-flash";
+// Gemini key alag rakho
+const _K = "AIzaSyC8hjdJIJO-Nh2-sole2odN2sc6vHdO_MI";
+const _M = "gemini-2.0-flash";
 const _EP = `https://generativelanguage.googleapis.com/v1beta/models/${_M}:generateContent?key=${_K}`;
-
 // ── AUTH GUARD ────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
   if (!user) {
