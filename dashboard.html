@@ -1,98 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TradeNox AI - Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tradinoxaior — AI Trading Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 </head>
 <body>
-  
+
   <header class="topbar">
     <div class="logo">
-      <span class="pulse-dot"></span> TradeNox <span class="badge-pro">CORE AI</span>
+      <span class="pulse-dot"></span>
+      Tradinoxaior
+      <span class="badge-pro">AI v4</span>
     </div>
     <div class="topbar-right">
-      <span class="user-greeting">Welcome, <span id="display-username">Trader</span></span>
-      <button id="btn-logout" class="btn secondary danger-btn" style="padding: 6px 12px; font-size: 12px;">Logout</button>
+      <div class="api-badge">⚡ Gemini 2.5</div>
+      <span class="user-greeting">Hey, <span id="display-username">Trader</span></span>
+      <button id="btn-settings" class="icon-btn">⚙️</button>
+      <div id="settings-menu" class="settings-dropdown glass hidden">
+        <button id="btn-theme"  class="btn secondary">🌗 Toggle Theme</button>
+        <button id="btn-logout" class="btn secondary danger-btn">🚪 Sign Out</button>
+      </div>
     </div>
   </header>
 
   <div class="dashboard-container">
+    <div class="ad-banner ad-top">Advertisement — 728×90</div>
     <main class="dashboard-grid">
+
+      <!-- LEFT -->
       <div class="main-content">
         <div class="card glass">
           <div class="card-header">
-            <h2>Neural Chart Processing</h2>
-            <span class="status-indicator live">ENGINE ONLINE</span>
+            <h2>Gemini AI Chart Scanner</h2>
+            <span class="status-indicator live" id="engine-status">ONLINE</span>
           </div>
-          <p class="subtitle">Upload chart. AI will analyze structure and provide execution zones.</p>
-          
+          <p class="subtitle">
+            Upload any trading chart. Gemini 2.5 Flash Vision reads real price action,
+            detects SMC / patterns and gives complete trade setup with Entry · SL · Targets.
+          </p>
+
           <label class="upload-area" id="upload-container">
             <div id="upload-placeholder">
-              <div class="upload-icon-container"><span class="upload-icon">⛬</span></div>
-              <p class="upload-title">INITIALIZE SCAN</p>
+              <div class="upload-icon-container"><span class="upload-icon">📊</span></div>
+              <p class="upload-title">DROP YOUR CHART HERE</p>
+              <p class="subtitle">Click or drag — PNG / JPG / WebP</p>
             </div>
-            
             <div class="image-preview-wrapper" id="preview-wrapper">
-              <img id="preview-image" alt="Chart Preview" />
+              <img id="preview-image" alt="Chart"/>
+              <div class="hud-overlay"></div>
               <div class="scanner-laser" id="scanner-line"></div>
             </div>
-            <input type="file" id="file-upload" accept="image/*" style="display: none;" />
+            <input type="file" id="file-upload" accept="image/*" style="display:none"/>
           </label>
 
-          <button id="btn-analyze" class="btn primary full-width hidden">GENERATE TRADING SIGNAL</button>
-          
+          <button id="btn-analyze" class="btn primary full-width hidden">
+            ⚡ ANALYZE WITH GEMINI AI
+          </button>
+
           <div id="ai-status-container" class="terminal-box hidden">
             <div class="terminal-header">
-              <span>TradeNox Terminal</span>
+              <span>Tradinoxaior · Gemini 2.5 Flash Vision</span>
+              <span class="terminal-dots"><span></span><span></span><span></span></span>
             </div>
             <div class="terminal-body" id="terminal-body">
-              <p class="log-text">> Awaiting input...</p>
+              <p class="log-text">> Awaiting chart input...</p>
             </div>
             <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
           </div>
 
           <div id="error-card" class="error-card hidden">
-            <h3>ANALYSIS FAILED</h3>
-            <p id="error-msg">Neural engine could not process the chart. Try again.</p>
+            <h3>⚠ Analysis Failed</h3>
+            <p id="error-msg">Check your chart image and try again.</p>
           </div>
 
-          <!-- AI RESULT CARD -->
-          <div id="result-card" class="result-card glass hidden">
+          <!-- RESULT CARD -->
+          <div id="result-card" class="result-card hidden">
+
             <div class="verdict-header">
               <div>
-                <h3 style="color: var(--text-muted); font-size: 12px; letter-spacing: 2px;">ALGORITHMIC VERDICT</h3>
-                <h2 id="res-trend" style="font-size: 20px; margin-top: 5px;">--</h2>
+                <p class="verdict-label">GEMINI AI VERDICT</p>
+                <h2 id="res-trend" class="verdict-trend">--</h2>
               </div>
-              <span id="res-signal" class="signal-badge">--</span>
-            </div>
-            
-            <div class="execution-grid">
-              <div class="exec-box entry-box">
-                <span class="exec-label">ENTRY ZONE</span>
-                <span class="exec-value" id="res-entry">--</span>
-              </div>
-              <div class="exec-box stop-box">
-                <span class="exec-label">STOP LOSS</span>
-                <span class="exec-value" id="res-sl">--</span>
-              </div>
-              <div class="exec-box target-box">
-                <span class="exec-label">TAKE PROFIT</span>
-                <span class="exec-value" id="res-tp">--</span>
+              <div class="verdict-right">
+                <span id="res-signal" class="signal-badge">--</span>
+                <div class="conf-row">
+                  <span class="conf-label">Confidence:</span>
+                  <div class="conf-track"><div class="conf-fill" id="conf-fill"></div></div>
+                  <span id="res-confidence" class="conf-pct">--%</span>
+                </div>
               </div>
             </div>
 
-            <div class="analysis-box" style="margin-top: 20px;">
-              <span class="cell-label">LOGIC & REASONING</span>
+            <div class="data-grid four">
+              <div class="data-cell">
+                <span class="cell-label">ASSET / PAIR</span>
+                <span class="cell-value white" id="res-asset">--</span>
+              </div>
+              <div class="data-cell">
+                <span class="cell-label">MARKET</span>
+                <span class="cell-value" id="res-market">--</span>
+              </div>
+              <div class="data-cell">
+                <span class="cell-label">TIMEFRAME</span>
+                <span class="cell-value" id="res-timeframe">--</span>
+              </div>
+              <div class="data-cell">
+                <span class="cell-label">STRATEGY</span>
+                <span class="cell-value blue" id="res-strategy">--</span>
+              </div>
+            </div>
+
+            <p class="section-title">🎯 TRADE SETUP</p>
+            <div class="trade-grid">
+              <div class="trade-cell entry">
+                <span class="trade-label">ENTRY ZONE</span>
+                <span class="trade-val" id="res-entry">--</span>
+                <span class="trade-sub" id="res-entry-note">--</span>
+              </div>
+              <div class="trade-cell sl">
+                <span class="trade-label">STOP LOSS</span>
+                <span class="trade-val" id="res-sl">--</span>
+                <span class="trade-sub" id="res-sl-note">--</span>
+              </div>
+              <div class="trade-cell tp1">
+                <span class="trade-label">TARGET 1</span>
+                <span class="trade-val" id="res-tp1">--</span>
+                <span class="trade-sub" id="res-rr1">R:R --</span>
+              </div>
+              <div class="trade-cell tp2">
+                <span class="trade-label">TARGET 2</span>
+                <span class="trade-val" id="res-tp2">--</span>
+                <span class="trade-sub" id="res-rr2">R:R --</span>
+              </div>
+            </div>
+
+            <p class="section-title">📍 KEY PRICE LEVELS</p>
+            <div class="levels-row">
+              <div class="level-pill support">
+                <span>Support</span><strong id="res-support">--</strong>
+              </div>
+              <div class="level-pill current">
+                <span>Current Price</span><strong id="res-price">--</strong>
+              </div>
+              <div class="level-pill resist">
+                <span>Resistance</span><strong id="res-resistance">--</strong>
+              </div>
+            </div>
+
+            <p class="section-title">🏦 SMART MONEY CONCEPTS</p>
+            <div class="smc-grid">
+              <div class="smc-item">
+                <span class="smc-icon">⬛</span>
+                <div><span class="smc-lbl">ORDER BLOCKS</span><p class="smc-val" id="res-ob">--</p></div>
+              </div>
+              <div class="smc-item">
+                <span class="smc-icon">↕️</span>
+                <div><span class="smc-lbl">FAIR VALUE GAP</span><p class="smc-val" id="res-fvg">--</p></div>
+              </div>
+              <div class="smc-item">
+                <span class="smc-icon">💧</span>
+                <div><span class="smc-lbl">LIQUIDITY ZONES</span><p class="smc-val" id="res-liq">--</p></div>
+              </div>
+              <div class="smc-item">
+                <span class="smc-icon">🔄</span>
+                <div><span class="smc-lbl">PATTERN DETECTED</span><p class="smc-val yellow" id="res-pattern">--</p></div>
+              </div>
+            </div>
+
+            <p class="section-title">🧠 INSTITUTIONAL ANALYSIS</p>
+            <div class="analysis-box">
               <p id="res-reason" class="analysis-text">...</p>
             </div>
-          </div>
+
+            <p class="section-title">📋 HOW TO TRADE THIS SETUP</p>
+            <div class="how-box" id="res-how">Loading...</div>
+
+            <p class="section-title">⚖️ RISK MANAGEMENT</p>
+            <div class="risk-grid">
+              <div class="risk-cell">
+                <span class="risk-lbl">Best R:R Ratio</span>
+                <span class="risk-val green" id="res-rr">--</span>
+              </div>
+              <div class="risk-cell">
+                <span class="risk-lbl">Trade Quality</span>
+                <span class="risk-val" id="res-validity">--</span>
+              </div>
+              <div class="risk-cell risk-warn-cell">
+                <span class="risk-lbl">⚠ Risk Warning</span>
+                <p class="risk-val-sm" id="res-risk">--</p>
+              </div>
+            </div>
+
+            <div class="disclaimer-box">
+              ⚠️ <strong>DISCLAIMER:</strong> This analysis is AI-generated for
+              <strong>educational purposes only</strong> and is
+              <strong>NOT financial advice</strong>. Trading involves substantial risk of loss.
+              Past performance does not guarantee future results.
+              <strong>Manage your own risk.</strong> Tradinoxaior is not liable for any losses.
+              Always consult a licensed financial advisor before trading.
+            </div>
+
+          </div><!-- /result-card -->
         </div>
       </div>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="ad-banner ad-side">Sidebar Ad — 250×250</div>
+        <div class="card glass terminal-style">
+          <h3 class="widget-title">📡 Market News</h3>
+          <div id="news-container"><div class="loading-pulse">Connecting...</div></div>
+        </div>
+        <div class="card glass" style="margin-top:16px">
+          <h3 class="widget-title">🌐 Trading Sessions</h3>
+          <div id="sessions-container" class="sessions-wrap"></div>
+        </div>
+        <div class="card glass" style="margin-top:16px">
+          <h3 class="widget-title">💡 Pro Tips</h3>
+          <div class="tips-list">
+            <p>📌 Always place SL below Order Block</p>
+            <p>📌 Risk max 1-2% per trade</p>
+            <p>📌 Wait for candle close confirmation</p>
+            <p>📌 Follow the HTF (Higher Timeframe) bias</p>
+            <p>📌 Never enter without a clear SL level</p>
+          </div>
+        </div>
+      </aside>
+
     </main>
   </div>
 
   <script type="module" src="dashboard.js"></script>
 </body>
   </html>
+  
