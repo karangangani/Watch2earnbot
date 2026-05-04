@@ -1,76 +1,1047 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TradeNox AI - Login</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tradinoxaior — AI Trading Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+/* ═══════════════════════════════════════
+   ROOT VARIABLES
+═══════════════════════════════════════ */
+:root {
+  --bg:      #010812;
+  --neon:    #00ff88;
+  --neon2:   #00d4ff;
+  --neon3:   #ff6b35;
+  --gold:    #ffd700;
+  --red:     #ff3366;
+  --card-bg: rgba(1, 12, 28, 0.82);
+  --border:  rgba(0,255,136,0.2);
+  --text:    #e0f0ff;
+  --muted:   #4a7090;
+  --mono:    'Share Tech Mono', monospace;
+  --display: 'Orbitron', sans-serif;
+  --body:    'Rajdhani', sans-serif;
+}
+
+/* ═══════════════════════════════════════
+   RESET
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--body);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══════════════════════════════════════
+   BACKGROUND CANVAS
+═══════════════════════════════════════ */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════
+   TICKER TAPE TOP
+═══════════════════════════════════════ */
+.ticker-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 32px;
+  background: rgba(0,0,0,0.85);
+  border-bottom: 1px solid rgba(0,255,136,0.15);
+  z-index: 50;
+  overflow: hidden;
+  display: flex; align-items: center;
+}
+.ticker-track {
+  display: flex;
+  gap: 0;
+  animation: tickerScroll 35s linear infinite;
+  white-space: nowrap;
+}
+.tick-item {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 8px;
+  border-right: 1px solid rgba(0,255,136,0.08);
+}
+.tick-sym  { color: var(--neon2); font-weight: 700; letter-spacing: 1px; }
+.tick-price{ color: var(--text); }
+.tick-up   { color: var(--neon); }
+.tick-down { color: var(--red); }
+
+/* ═══════════════════════════════════════
+   MAIN SCROLL AREA
+═══════════════════════════════════════ */
+.page-wrap {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 32px; /* ticker height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 32px);
+  padding-bottom: 20px;
+}
+
+/* ═══════════════════════════════════════
+   FLOATING SYMBOLS (decorative)
+═══════════════════════════════════════ */
+.float-symbols {
+  position: fixed;
+  inset: 32px 0 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+.fsym {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: 11px;
+  opacity: 0;
+  animation: floatUp 8s linear infinite;
+  color: var(--neon);
+}
+
+/* ═══════════════════════════════════════
+   GLASS CARD
+═══════════════════════════════════════ */
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  margin: 20px;
+  background: var(--card-bg);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(0,255,136,0.05),
+    0 0 60px rgba(0,255,136,0.08),
+    0 30px 80px rgba(0,0,0,0.8),
+    inset 0 1px 0 rgba(0,255,136,0.1);
+  animation: cardReveal 0.6s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+/* Corner accents */
+.auth-card::before,
+.auth-card::after {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  border-color: var(--neon);
+  border-style: solid;
+  z-index: 2;
+}
+.auth-card::before { top: 0; left: 0; border-width: 2px 0 0 2px; }
+.auth-card::after  { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+
+/* Scanline effect */
+.auth-card .scanline {
+  position: absolute;
+  top: -100%;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,0.4), transparent);
+  animation: scanline 4s ease-in-out infinite;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.card-inner {
+  padding: 32px 28px 28px;
+  position: relative;
+  z-index: 4;
+}
+
+/* ── BRAND ── */
+.brand {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.logo-mark {
+  width: 62px; height: 62px;
+  margin: 0 auto 14px;
+  position: relative;
+}
+.logo-ring {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(0,255,136,0.3);
+  animation: ringPulse 2s ease-in-out infinite;
+}
+.logo-ring:nth-child(2) {
+  inset: 6px;
+  border-color: rgba(0,212,255,0.25);
+  animation-delay: 0.4s;
+}
+.logo-core {
+  position: absolute;
+  inset: 12px;
+  background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,212,255,0.1));
+  border-radius: 50%;
+  border: 1px solid rgba(0,255,136,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+
+.brand-name {
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--neon) 0%, var(--neon2) 60%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 5px;
+}
+
+.brand-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ── SYSTEM STATUS ── */
+.sys-status {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px;
+  margin-bottom: 22px;
+  padding: 8px 14px;
+  background: rgba(0,255,136,0.04);
+  border: 1px solid rgba(0,255,136,0.08);
+  border-radius: 2px;
+}
+.sys-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--neon);
+  box-shadow: 0 0 8px var(--neon);
+  animation: dot-pulse 1.5s infinite;
+}
+.sys-txt {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: 1.5px;
+  color: var(--neon);
+}
+.sys-model {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--neon2);
+  letter-spacing: 1px;
+  margin-left: auto;
+}
+
+/* ── TABS ── */
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(0,255,136,0.1);
+  border-radius: 3px;
+  padding: 3px;
+  margin-bottom: 22px;
+  gap: 3px;
+}
+.tab-btn {
+  padding: 9px;
+  background: none;
+  border: none;
+  border-radius: 2px;
+  font-family: var(--display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.tab-btn.active {
+  background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,212,255,0.1));
+  color: var(--neon);
+  border: 1px solid rgba(0,255,136,0.25);
+  box-shadow: 0 0 16px rgba(0,255,136,0.1);
+  text-shadow: 0 0 12px rgba(0,255,136,0.6);
+}
+
+/* ── FIELDS ── */
+.field { margin-bottom: 14px; }
+.field-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 7px;
+}
+.input-wrap { position: relative; }
+.input-icon {
+  position: absolute; left: 13px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+.auth-input {
+  width: 100%;
+  padding: 12px 14px 12px 40px;
+  background: rgba(0,212,255,0.03);
+  border: 1px solid rgba(0,255,136,0.12);
+  border-radius: 3px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+.auth-input:focus {
+  border-color: var(--neon);
+  background: rgba(0,255,136,0.05);
+  box-shadow: 0 0 0 2px rgba(0,255,136,0.1), 0 0 20px rgba(0,255,136,0.06);
+}
+.auth-input::placeholder { color: rgba(74,112,144,0.6); }
+.eye-btn {
+  position: absolute; right: 13px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  color: var(--muted); cursor: pointer;
+  font-size: 15px; padding: 4px;
+  transition: color 0.2s;
+}
+.eye-btn:hover { color: var(--neon); }
+
+/* ── ROW ── */
+.row-util {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 18px;
+}
+.remember {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--muted); cursor: pointer;
+}
+.remember input[type=checkbox] {
+  width: 14px; height: 14px;
+  accent-color: var(--neon); cursor: pointer;
+}
+.forgot-link {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--neon); letter-spacing: 0.5px;
+  text-decoration: none;
+  transition: text-shadow 0.2s;
+}
+.forgot-link:hover { text-shadow: 0 0 12px var(--neon); }
+
+/* ── SUBMIT BUTTON ── */
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(0,255,136,0.9), rgba(0,200,100,0.9));
+  border: none;
+  border-radius: 3px;
+  color: #000;
+  font-family: var(--display);
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  cursor: pointer;
+  position: relative; overflow: hidden;
+  transition: all 0.25s;
+  box-shadow: 0 0 24px rgba(0,255,136,0.3), 0 4px 15px rgba(0,0,0,0.4);
+  margin-bottom: 18px;
+}
+.btn-submit::before {
+  content: '';
+  position: absolute; top: 0; left: -100%; right: 100%; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: all 0.5s;
+}
+.btn-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 35px rgba(0,255,136,0.45), 0 8px 20px rgba(0,0,0,0.5);
+}
+.btn-submit:hover::before { left: 100%; right: -100%; }
+.btn-submit:active { transform: translateY(0); }
+
+/* ── DIVIDER ── */
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px;
+}
+.div-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,0.15), transparent);
+}
+.div-txt {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--muted); letter-spacing: 2px;
+}
+
+/* ── SOCIAL BTN ── */
+.btn-social {
+  width: 100%;
+  padding: 11px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(0,255,136,0.1);
+  border-radius: 3px;
+  color: var(--text);
+  font-family: var(--mono); font-size: 12px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+.btn-social:hover {
+  border-color: rgba(0,255,136,0.25);
+  background: rgba(0,255,136,0.05);
+  box-shadow: 0 0 15px rgba(0,255,136,0.08);
+}
+.btn-social img { width: 17px; height: 17px; }
+
+/* ── BOTTOM STATS ── */
+.card-footer {
+  display: flex; justify-content: space-between;
+  padding: 10px 28px;
+  background: rgba(0,0,0,0.3);
+  border-top: 1px solid rgba(0,255,136,0.06);
+}
+.foot-stat {
+  text-align: center;
+}
+.foot-val {
+  font-family: var(--display); font-size: 13px;
+  color: var(--neon); font-weight: 700;
+  display: block; letter-spacing: 1px;
+}
+.foot-lbl {
+  font-family: var(--mono); font-size: 8px;
+  color: var(--muted); letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: rgba(1,12,28,0.95);
+  border: 1px solid var(--neon);
+  color: var(--text);
+  padding: 11px 22px;
+  border-radius: 3px;
+  font-family: var(--mono); font-size: 12px;
+  transition: transform 0.3s ease;
+  z-index: 9999;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 0 20px rgba(0,255,136,0.15);
+  letter-spacing: 0.5px;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════ */
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes cardReveal {
+  0%   { opacity: 0; transform: translateY(30px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes scanline {
+  0%   { top: -2px; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 102%; opacity: 0; }
+}
+@keyframes ringPulse {
+  0%, 100% { transform: scale(1);   opacity: 0.6; }
+  50%       { transform: scale(1.1); opacity: 1;   }
+}
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--neon); }
+  50%       { opacity: 0.5; box-shadow: 0 0 4px var(--neon); }
+}
+@keyframes floatUp {
+  0%   { transform: translateY(0);     opacity: 0; }
+  10%  { opacity: 0.4; }
+  90%  { opacity: 0.15; }
+  100% { transform: translateY(-100vh); opacity: 0; }
+}
+  </style>
 </head>
-<body class="light-mode">
-  <div class="auth-wrapper">
-    <div class="auth-card">
-      <div class="brand-header">
-        <h2 class="brand-name">TradeNox</h2>
-        <h1>Start building today</h1>
-        <p>Join thousands of traders who've already<br>optimized their trades</p>
+<body>
+
+<!-- ═══════════════════════════════════
+     BACKGROUND CANVAS
+═══════════════════════════════════ -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ═══════════════════════════════════
+     TICKER TAPE
+═══════════════════════════════════ -->
+<div class="ticker-bar">
+  <div class="ticker-track" id="ticker-track">
+    <!-- Filled by JS -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     FLOATING SYMBOLS
+═══════════════════════════════════ -->
+<div class="float-symbols" id="float-symbols"></div>
+
+<!-- ═══════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════ -->
+<div class="page-wrap">
+  <div class="auth-card">
+    <div class="scanline"></div>
+
+    <div class="card-inner">
+      <!-- Brand -->
+      <div class="brand">
+        <div class="logo-mark">
+          <div class="logo-ring"></div>
+          <div class="logo-ring"></div>
+          <div class="logo-core">📈</div>
+        </div>
+        <div class="brand-name">Tradinoxaior</div>
+        <div class="brand-tag">AI · Neural · Trading · Intelligence</div>
       </div>
 
-      <div class="toggle-tabs">
-        <button id="tab-login" class="tab active">Sign In</button>
-        <button id="tab-register" class="tab">Register</button>
+      <!-- System status -->
+      <div class="sys-status">
+        <div class="sys-dot"></div>
+        <span class="sys-txt">SYSTEM ONLINE</span>
+        <span class="sys-model">GEMINI 2.5 FLASH</span>
       </div>
 
-      <form id="auth-form">
-        <div id="username-container" class="input-group hidden">
-          <label>Username</label>
-          <div class="input-wrapper">
-            <span class="icon">👤</span>
-            <input type="text" id="username" placeholder="Enter your username" />
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
+        <button class="tab-btn"        id="tab-signup" onclick="switchTab('signup')">Register</button>
+      </div>
+
+      <!-- SIGN IN -->
+      <div id="panel-signin">
+        <div class="field">
+          <label class="field-label">Email Address</label>
+          <div class="input-wrap">
+            <span class="input-icon">✉</span>
+            <input class="auth-input" type="email" id="si-email" placeholder="trader@example.com" autocomplete="email"/>
           </div>
         </div>
-
-        <div class="input-group">
-          <label>Email</label>
-          <div class="input-wrapper">
-            <span class="icon">✉️</span>
-            <input type="email" id="email" placeholder="Enter your email" />
+        <div class="field">
+          <label class="field-label">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input class="auth-input" type="password" id="si-password" placeholder="Enter password" autocomplete="current-password"/>
+            <button class="eye-btn" onclick="togglePass('si-password',this)">👁</button>
           </div>
         </div>
-
-        <div class="input-group">
-          <label>Password</label>
-          <div class="input-wrapper">
-            <span class="icon">🔒</span>
-            <input type="password" id="password" placeholder="Enter your password" />
-            <span class="eye-icon">👁️</span>
-          </div>
-        </div>
-
-        <div class="auth-options" id="auth-options">
+        <div class="row-util">
           <label class="remember">
-            <input type="checkbox"> Remember me
+            <input type="checkbox" id="si-remember"/> Remember me
           </label>
-          <a href="#" class="forgot-link">Forgot Password?</a>
+          <a href="#" class="forgot-link" id="btn-forgot">Forgot Password?</a>
         </div>
+        <button class="btn-submit" id="btn-signin">▶ SIGN IN</button>
+      </div>
 
-        <button type="button" id="btn-submit" class="btn-primary-auth">Sign In</button>
+      <!-- REGISTER -->
+      <div id="panel-signup" style="display:none">
+        <div class="field">
+          <label class="field-label">Username</label>
+          <div class="input-wrap">
+            <span class="input-icon">👤</span>
+            <input class="auth-input" type="text" id="su-username" placeholder="Choose a username" autocomplete="nickname"/>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Email Address</label>
+          <div class="input-wrap">
+            <span class="input-icon">✉</span>
+            <input class="auth-input" type="email" id="su-email" placeholder="trader@example.com" autocomplete="email"/>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input class="auth-input" type="password" id="su-password" placeholder="Min 6 characters" autocomplete="new-password"/>
+            <button class="eye-btn" onclick="togglePass('su-password',this)">👁</button>
+          </div>
+        </div>
+        <button class="btn-submit" id="btn-signup">▶ CREATE ACCOUNT</button>
+      </div>
 
-        <div class="divider-text"><span>Or</span></div>
+      <!-- Divider + Google -->
+      <div class="divider">
+        <div class="div-line"></div>
+        <span class="div-txt">OR</span>
+        <div class="div-line"></div>
+      </div>
+      <button class="btn-social" id="btn-google">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G"/>
+        Continue with Google
+      </button>
+    </div><!-- /card-inner -->
 
-        <button type="button" id="btn-google" class="btn-social">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" width="18"/>
-          Sign In with Google
-        </button>
-        
-        <button type="button" class="btn-social">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub" width="18"/>
-          Sign In with GitHub
-        </button>
-      </form>
+    <!-- Footer stats -->
+    <div class="card-footer">
+      <div class="foot-stat">
+        <span class="foot-val">50K+</span>
+        <span class="foot-lbl">Traders</span>
+      </div>
+      <div class="foot-stat">
+        <span class="foot-val">2.5M+</span>
+        <span class="foot-lbl">Analyses</span>
+      </div>
+      <div class="foot-stat">
+        <span class="foot-val">98.2%</span>
+        <span class="foot-lbl">Uptime</span>
+      </div>
+      <div class="foot-stat">
+        <span class="foot-val">AI v4</span>
+        <span class="foot-lbl">Powered</span>
+      </div>
     </div>
   </div>
+</div>
 
-  <script type="module" src="app.js"></script>
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════
+     CANVAS ANIMATION ENGINE
+═══════════════════════════════════ -->
+<script>
+// ── CANVAS SETUP ─────────────────────
+const canvas = document.getElementById('bg-canvas');
+const ctx    = canvas.getContext('2d');
+
+function resize() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── COLOR PALETTE ────────────────────
+const C = {
+  neon:   '#00ff88',
+  cyan:   '#00d4ff',
+  orange: '#ff6b35',
+  red:    '#ff3366',
+  gold:   '#ffd700',
+  purple: '#7c3aed',
+  white:  'rgba(255,255,255,0.7)'
+};
+
+// ── GRID LINES ──────────────────────
+function drawGrid() {
+  const W = canvas.width, H = canvas.height;
+  ctx.strokeStyle = 'rgba(0,255,136,0.03)';
+  ctx.lineWidth   = 1;
+  const step = 60;
+  for (let x = 0; x < W; x += step) {
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += step) {
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+  // Perspective grid
+  ctx.strokeStyle = 'rgba(0,212,255,0.025)';
+  const cx = W / 2, cy = H;
+  for (let i = -10; i <= 10; i++) {
+    ctx.beginPath();
+    ctx.moveTo(cx + i * 120, 0);
+    ctx.lineTo(cx, cy);
+    ctx.stroke();
+  }
+}
+// ── CANDLESTICK CHARTS ───────────────
+class CandleChart {
+  constructor(x, y, w, h, color, speed) {
+    this.x = x; this.y = y; this.w = w; this.h = h;
+    this.color  = color;
+    this.speed  = speed;
+    this.candles= [];
+    this.offset = 0;
+    this.opacity= 0.08 + Math.random() * 0.12;
+    this.generate();
+  }
+
+  generate() {
+    let price = 100 + Math.random() * 100;
+    const num = Math.ceil(this.w / 14) + 5;
+    for (let i = 0; i < num; i++) {
+      const change = (Math.random() - 0.48) * 6;
+      const open   = price;
+      price       += change;
+      const close  = price;
+      const high   = Math.max(open, close) + Math.random() * 4;
+      const low    = Math.min(open, close) - Math.random() * 4;
+      this.candles.push({ open, close, high, low });
+    }
+  }
+
+  update() { this.offset += this.speed; if (this.offset > 14) { this.offset = 0; this.candles.shift(); const last = this.candles[this.candles.length-1].close; const change = (Math.random()-0.48)*6; const open=last, close=last+change; this.candles.push({open,close,high:Math.max(open,close)+Math.random()*4,low:Math.min(open,close)-Math.random()*4}); } }
+
+  draw() {
+    const prices = this.candles.map(c => [c.high, c.low]).flat();
+    const minP = Math.min(...prices), maxP = Math.max(...prices);
+    const range = maxP - minP || 1;
+    const scaleY = p => this.y + this.h - ((p - minP) / range) * this.h;
+
+    ctx.save();
+    ctx.globalAlpha = this.opacity;
+
+    this.candles.forEach((c, i) => {
+      const cx    = this.x + i * 14 - this.offset;
+      if (cx < this.x - 20 || cx > this.x + this.w + 20) return;
+      const bull  = c.close >= c.open;
+      const col   = bull ? C.neon : C.red;
+      const openY = scaleY(c.open), closeY = scaleY(c.close);
+      const highY = scaleY(c.high), lowY   = scaleY(c.low);
+
+      ctx.strokeStyle = col;
+      ctx.lineWidth   = 1;
+      ctx.beginPath(); ctx.moveTo(cx+5, highY); ctx.lineTo(cx+5, lowY); ctx.stroke();
+
+      ctx.fillStyle = bull ? col : 'transparent';
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1;
+      const top = Math.min(openY, closeY), ht = Math.max(Math.abs(closeY - openY), 1);
+      ctx.fillRect(cx+1, top, 8, ht);
+      if (!bull) ctx.strokeRect(cx+1, top, 8, ht);
+    });
+
+    // MA line
+    if (this.candles.length > 5) {
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth   = 1.5;
+      ctx.globalAlpha = this.opacity * 1.5;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur  = 6;
+      ctx.beginPath();
+      this.candles.forEach((c, i) => {
+        const cx = this.x + i * 14 - this.offset;
+        const cy = scaleY(c.close);
+        if (i === 0) ctx.moveTo(cx+5, cy);
+        else          ctx.lineTo(cx+5, cy);
+      });
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+    ctx.restore();
+  }
+}
+
+// ── LINE CHARTS (forex-style) ─────────
+class LineChart {
+  constructor(x, y, w, h, color) {
+    this.x = x; this.y = y; this.w = w; this.h = h; this.color = color;
+    this.points = [];
+    this.offset = 0;
+    this.speed  = 0.3 + Math.random() * 0.4;
+    this.opacity= 0.06 + Math.random() * 0.1;
+    let v = 0.5;
+    for (let i = 0; i < w / 4 + 10; i++) {
+      v += (Math.random() - 0.49) * 0.04;
+      v  = Math.max(0.05, Math.min(0.95, v));
+      this.points.push(v);
+    }
+  }
+  update() {
+    this.offset += this.speed;
+    if (this.offset > 4) {
+      this.offset = 0;
+      let last = this.points[this.points.length-1];
+      last += (Math.random()-0.49)*0.04;
+      last = Math.max(0.05, Math.min(0.95, last));
+      this.points.push(last);
+      if (this.points.length > this.w/4+20) this.points.shift();
+    }
+  }
+  draw() {
+    if (this.points.length < 2) return;
+    ctx.save();
+    ctx.globalAlpha = this.opacity;
+
+    // Glow gradient fill
+    const grad = ctx.createLinearGradient(this.x, this.y, this.x, this.y+this.h);
+    grad.addColorStop(0, this.color.replace(')', ',0.3)').replace('rgb','rgba'));
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle   = grad;
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth   = 1.5;
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur  = 8;
+
+    ctx.beginPath();
+    this.points.forEach((p, i) => {
+      const px = this.x + i*4 - this.offset;
+      const py = this.y + this.h - p * this.h;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    });
+    ctx.stroke();
+
+    // Fill under
+    const lastPx = this.x + (this.points.length-1)*4 - this.offset;
+    const lastPy = this.y + this.h - this.points[this.points.length-1]*this.h;
+    ctx.lineTo(lastPx, this.y+this.h);
+    ctx.lineTo(this.x, this.y+this.h);
+    ctx.closePath();
+    ctx.globalAlpha = this.opacity * 0.4;
+    ctx.fill();
+
+    ctx.restore();
+  }
+}
+
+// ── DATA PARTICLES ───────────────────
+class DataParticle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x    = Math.random() * canvas.width;
+    this.y    = -20;
+    this.vy   = 0.5 + Math.random() * 1.5;
+    this.char = String.fromCharCode(0x30A0 + Math.random()*96) ;
+    const chars = ['0','1','↑','↓','$','₿','€','¥','%','+','-','×'];
+    this.char = chars[Math.floor(Math.random()*chars.length)];
+    this.col  = Math.random() > 0.7 ? C.cyan : C.neon;
+    this.alpha= 0.08 + Math.random() * 0.15;
+    this.size = 9 + Math.random() * 5;
+  }
+  update() { this.y += this.vy; if (this.y > canvas.height + 20) this.reset(); }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha  = this.alpha;
+    ctx.fillStyle    = this.col;
+    ctx.font         = `${this.size}px 'Share Tech Mono', monospace`;
+    ctx.shadowColor  = this.col;
+    ctx.shadowBlur   = 4;
+    ctx.fillText(this.char, this.x, this.y);
+    ctx.restore();
+  }
+}
+
+// ── GLOWING ORBS ─────────────────────
+class GlowOrb {
+  constructor() { this.reset(); }
+  reset() {
+    this.x    = Math.random() * canvas.width;
+    this.y    = Math.random() * canvas.height;
+    this.r    = 80 + Math.random() * 200;
+    this.col  = [C.neon, C.cyan, C.purple, C.orange][Math.floor(Math.random()*4)];
+    this.alpha= 0.02 + Math.random() * 0.04;
+    this.vx   = (Math.random()-0.5) * 0.2;
+    this.vy   = (Math.random()-0.5) * 0.2;
+    this.life = 0;
+    this.maxLife = 300 + Math.random()*400;
+  }
+  update() {
+    this.x += this.vx; this.y += this.vy; this.life++;
+    if (this.life > this.maxLife) this.reset();
+  }
+  draw() {
+    const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);
+    g.addColorStop(0, this.col.replace(')', `,${this.alpha})`).replace('#','rgba(').replace(/([0-9a-f]{2})/gi, (m,v)=>parseInt(v,16)+','));
+    g.addColorStop(1, 'transparent');
+    ctx.save();
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// ── INIT OBJECTS ─────────────────────
+const W = canvas.width, H = canvas.height;
+
+const candleCharts = [
+  new CandleChart(0,       H*0.1, W*0.35, H*0.35, C.neon,   0.4),
+  new CandleChart(W*0.65,  H*0.1, W*0.35, H*0.3,  C.cyan,   0.35),
+  new CandleChart(0,       H*0.6, W*0.4,  H*0.35, C.orange, 0.3),
+  new CandleChart(W*0.55,  H*0.55,W*0.45, H*0.4,  C.red,    0.45),
+];
+
+const lineCharts = [
+  new LineChart(0,       H*0.45, W*0.5,  H*0.15, C.cyan),
+  new LineChart(W*0.4,   H*0.02, W*0.6,  H*0.1,  C.gold),
+  new LineChart(W*0.2,   H*0.85, W*0.8,  H*0.12, C.neon),
+];
+
+const particles = Array.from({length: 60}, () => new DataParticle());
+const orbs      = Array.from({length: 5},  () => new GlowOrb());
+
+// Scatter particles randomly at start
+particles.forEach(p => { p.y = Math.random() * canvas.height; });
+
+// ── ANIMATED LABELS ──────────────────
+const labels = [
+  {x: W*0.05, y: H*0.08, text: 'BTC/USD',  col: C.gold,   val: ()=>formatPrice(94230 + oscillate(500, 0.001))},
+  {x: W*0.7,  y: H*0.08, text: 'ETH/USD',  col: C.cyan,   val: ()=>formatPrice(3810 + oscillate(80, 0.0013))},
+  {x: W*0.05, y: H*0.58, text: 'EUR/USD',  col: C.neon,   val: ()=>formatPrice(1.0854 + oscillate(0.003, 0.0009), 4)},
+  {x: W*0.6,  y: H*0.52, text: 'NIFTY',    col: C.orange, val: ()=>formatPrice(24180 + oscillate(200, 0.0007))},
+];
+let frame = 0;
+function oscillate(amp, speed) { return Math.sin(frame * speed) * amp; }
+function formatPrice(n, dec=2) { return n.toLocaleString('en-US', {minimumFractionDigits:dec,maximumFractionDigits:dec}); }
+
+function drawLabels() {
+  labels.forEach(l => {
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    ctx.font        = `bold 10px 'Share Tech Mono'`;
+    ctx.fillStyle   = l.col;
+    ctx.shadowColor = l.col;
+    ctx.shadowBlur  = 6;
+    ctx.fillText(l.text, l.x, l.y);
+    ctx.font        = `12px 'Share Tech Mono'`;
+    ctx.globalAlpha = 0.7;
+    ctx.fillText(l.val(), l.x, l.y + 16);
+    ctx.restore();
+  });
+}
+
+// ── DRAW SCAN LINE ───────────────────
+let scanY = 0;
+function drawScan() {
+  scanY = (scanY + 0.8) % canvas.height;
+  const g = ctx.createLinearGradient(0,scanY-40,0,scanY+40);
+  g.addColorStop(0, 'transparent');
+  g.addColorStop(0.5, 'rgba(0,255,136,0.03)');
+  g.addColorStop(1, 'transparent');
+  ctx.save();
+  ctx.fillStyle = g;
+  ctx.fillRect(0,scanY-40,canvas.width,80);
+  ctx.restore();
+}
+
+// ── MAIN LOOP ─────────────────────────
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Deep background
+  ctx.fillStyle = 'rgba(1,8,18,1)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  drawGrid();
+
+  orbs.forEach(o => { o.update(); o.draw(); });
+  drawScan();
+  lineCharts.forEach(l => { l.update(); l.draw(); });
+  candleCharts.forEach(c => { c.update(); c.draw(); });
+  particles.forEach(p => { p.update(); p.draw(); });
+  drawLabels();
+
+  frame++;
+  requestAnimationFrame(draw);
+}
+draw();
+  
+// ── TICKER TAPE ──────────────────────
+const TICKERS = [
+  {sym:'BTC/USDT', price:'94,230', chg:'+2.4%', up:true},
+  {sym:'ETH/USDT', price:'3,810',  chg:'+1.8%', up:true},
+  {sym:'SOL/USDT', price:'182.4',  chg:'-0.9%', up:false},
+  {sym:'BNB/USDT', price:'612.1',  chg:'+0.5%', up:true},
+  {sym:'XRP/USDT', price:'0.5820', chg:'+3.2%', up:true},
+  {sym:'EUR/USD',  price:'1.0854', chg:'-0.1%', up:false},
+  {sym:'GBP/USD',  price:'1.2631', chg:'+0.2%', up:true},
+  {sym:'NIFTY50',  price:'24,180', chg:'+0.8%', up:true},
+  {sym:'SENSEX',   price:'79,502', chg:'+0.6%', up:true},
+  {sym:'GOLD',     price:'2,385',  chg:'+0.3%', up:true},
+  {sym:'NASDAQ',   price:'19,827', chg:'+1.1%', up:true},
+  {sym:'AAPL',     price:'218.4',  chg:'-0.3%', up:false},
+  {sym:'DOGE/USDT',price:'0.1542', chg:'+5.1%', up:true},
+  {sym:'AVAX/USDT',price:'38.72',  chg:'-1.2%', up:false},
+];
+
+function buildTicker() {
+  const track = document.getElementById('ticker-track');
+  const html  = [...TICKERS,...TICKERS].map(t=>`
+    <span class="tick-item">
+      <span class="tick-sym">${t.sym}</span>
+      <span class="tick-price">${t.price}</span>
+      <span class="${t.up?'tick-up':'tick-down'}">${t.chg}</span>
+    </span>`).join('');
+  track.innerHTML = html;
+}
+buildTicker();
+
+// ── FLOATING SYMBOLS ────────────────
+const symEl = document.getElementById('float-symbols');
+const SYMS  = ['BTC','ETH','₿','$','€','¥','₹','📈','📉','🔥','SOL','XRP','AI','BUY','SELL','LONG','SHORT','SMC','FVG','OB'];
+function spawnSymbol() {
+  const el  = document.createElement('div');
+  el.className = 'fsym';
+  el.textContent = SYMS[Math.floor(Math.random()*SYMS.length)];
+  el.style.left  = Math.random()*100 + 'vw';
+  el.style.top   = (90+Math.random()*10) + 'vh';
+  el.style.animationDuration  = (6+Math.random()*6)+'s';
+  el.style.animationDelay     = (Math.random()*2)+'s';
+  el.style.color = [C.neon,C.cyan,C.orange,C.gold][Math.floor(Math.random()*4)];
+  el.style.fontSize = (10+Math.random()*10)+'px';
+  symEl.appendChild(el);
+  setTimeout(()=>el.remove(), 12000);
+}
+setInterval(spawnSymbol, 800);
+for (let i=0;i<6;i++) spawnSymbol();
+
+</script>
+
+<!-- ═══════════════════════════════════
+     AUTH LOGIC
+═══════════════════════════════════ -->
+<script>
+function switchTab(tab) {
+  document.getElementById('panel-signin').style.display = tab==='signin'?'block':'none';
+  document.getElementById('panel-signup').style.display = tab==='signup'?'block':'none';
+  document.getElementById('tab-signin').classList.toggle('active', tab==='signin');
+  document.getElementById('tab-signup').classList.toggle('active', tab==='signup');
+}
+function togglePass(id, btn) {
+  const el = document.getElementById(id);
+  el.type  = el.type==='password'?'text':'password';
+  btn.textContent = el.type==='password'?'👁':'🙈';
+}
+function showToast(msg, col='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = col||'var(--neon)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+</script>
+
+<script type="module" src="app.js"></script>
 </body>
-          </html>
+</html>
+  
