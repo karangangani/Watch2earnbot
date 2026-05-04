@@ -3,237 +3,230 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tradinoxaior — AI Trading Dashboard</title>
+  <title>Tradinoxaior — Dashboard</title>
   <link rel="stylesheet" href="style.css"/>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 </head>
 <body>
 
-  <header class="topbar">
-    <div class="logo">
-      <span class="pulse-dot"></span>
-      Tradinoxaior
-      <span class="badge-pro">AI v4</span>
-    </div>
-    <div class="topbar-right">
-      <div class="api-badge">⚡ Gemini 2.5</div>
-      <span class="user-greeting">Hey, <span id="display-username">Trader</span></span>
-      <button id="btn-settings" class="icon-btn">⚙️</button>
-      <div id="settings-menu" class="settings-dropdown glass hidden">
-        <button id="btn-theme"  class="btn secondary">🌗 Toggle Theme</button>
-        <button id="btn-logout" class="btn secondary danger-btn">🚪 Sign Out</button>
-      </div>
-    </div>
-  </header>
-
-  <div class="dashboard-container">
-    <div class="ad-banner ad-top">Advertisement — 728×90</div>
-    <main class="dashboard-grid">
-
-      <!-- LEFT -->
-      <div class="main-content">
-        <div class="card glass">
-          <div class="card-header">
-            <h2>Gemini AI Chart Scanner</h2>
-            <span class="status-indicator live" id="engine-status">ONLINE</span>
-          </div>
-          <p class="subtitle">
-            Upload any trading chart. Gemini 2.5 Flash Vision reads real price action,
-            detects SMC / patterns and gives complete trade setup with Entry · SL · Targets.
-          </p>
-
-          <label class="upload-area" id="upload-container">
-            <div id="upload-placeholder">
-              <div class="upload-icon-container"><span class="upload-icon">📊</span></div>
-              <p class="upload-title">DROP YOUR CHART HERE</p>
-              <p class="subtitle">Click or drag — PNG / JPG / WebP</p>
-            </div>
-            <div class="image-preview-wrapper" id="preview-wrapper">
-              <img id="preview-image" alt="Chart"/>
-              <div class="hud-overlay"></div>
-              <div class="scanner-laser" id="scanner-line"></div>
-            </div>
-            <input type="file" id="file-upload" accept="image/*" style="display:none"/>
-          </label>
-
-          <button id="btn-analyze" class="btn primary full-width hidden">
-            ⚡ ANALYZE WITH GEMINI AI
-          </button>
-
-          <div id="ai-status-container" class="terminal-box hidden">
-            <div class="terminal-header">
-              <span>Tradinoxaior · Gemini 2.5 Flash Vision</span>
-              <span class="terminal-dots"><span></span><span></span><span></span></span>
-            </div>
-            <div class="terminal-body" id="terminal-body">
-              <p class="log-text">> Awaiting chart input...</p>
-            </div>
-            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-          </div>
-
-          <div id="error-card" class="error-card hidden">
-            <h3>⚠ Analysis Failed</h3>
-            <p id="error-msg">Check your chart image and try again.</p>
-          </div>
-
-          <!-- RESULT CARD -->
-          <div id="result-card" class="result-card hidden">
-
-            <div class="verdict-header">
-              <div>
-                <p class="verdict-label">GEMINI AI VERDICT</p>
-                <h2 id="res-trend" class="verdict-trend">--</h2>
-              </div>
-              <div class="verdict-right">
-                <span id="res-signal" class="signal-badge">--</span>
-                <div class="conf-row">
-                  <span class="conf-label">Confidence:</span>
-                  <div class="conf-track"><div class="conf-fill" id="conf-fill"></div></div>
-                  <span id="res-confidence" class="conf-pct">--%</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="data-grid four">
-              <div class="data-cell">
-                <span class="cell-label">ASSET / PAIR</span>
-                <span class="cell-value white" id="res-asset">--</span>
-              </div>
-              <div class="data-cell">
-                <span class="cell-label">MARKET</span>
-                <span class="cell-value" id="res-market">--</span>
-              </div>
-              <div class="data-cell">
-                <span class="cell-label">TIMEFRAME</span>
-                <span class="cell-value" id="res-timeframe">--</span>
-              </div>
-              <div class="data-cell">
-                <span class="cell-label">STRATEGY</span>
-                <span class="cell-value blue" id="res-strategy">--</span>
-              </div>
-            </div>
-
-            <p class="section-title">🎯 TRADE SETUP</p>
-            <div class="trade-grid">
-              <div class="trade-cell entry">
-                <span class="trade-label">ENTRY ZONE</span>
-                <span class="trade-val" id="res-entry">--</span>
-                <span class="trade-sub" id="res-entry-note">--</span>
-              </div>
-              <div class="trade-cell sl">
-                <span class="trade-label">STOP LOSS</span>
-                <span class="trade-val" id="res-sl">--</span>
-                <span class="trade-sub" id="res-sl-note">--</span>
-              </div>
-              <div class="trade-cell tp1">
-                <span class="trade-label">TARGET 1</span>
-                <span class="trade-val" id="res-tp1">--</span>
-                <span class="trade-sub" id="res-rr1">R:R --</span>
-              </div>
-              <div class="trade-cell tp2">
-                <span class="trade-label">TARGET 2</span>
-                <span class="trade-val" id="res-tp2">--</span>
-                <span class="trade-sub" id="res-rr2">R:R --</span>
-              </div>
-            </div>
-
-            <p class="section-title">📍 KEY PRICE LEVELS</p>
-            <div class="levels-row">
-              <div class="level-pill support">
-                <span>Support</span><strong id="res-support">--</strong>
-              </div>
-              <div class="level-pill current">
-                <span>Current Price</span><strong id="res-price">--</strong>
-              </div>
-              <div class="level-pill resist">
-                <span>Resistance</span><strong id="res-resistance">--</strong>
-              </div>
-            </div>
-
-            <p class="section-title">🏦 SMART MONEY CONCEPTS</p>
-            <div class="smc-grid">
-              <div class="smc-item">
-                <span class="smc-icon">⬛</span>
-                <div><span class="smc-lbl">ORDER BLOCKS</span><p class="smc-val" id="res-ob">--</p></div>
-              </div>
-              <div class="smc-item">
-                <span class="smc-icon">↕️</span>
-                <div><span class="smc-lbl">FAIR VALUE GAP</span><p class="smc-val" id="res-fvg">--</p></div>
-              </div>
-              <div class="smc-item">
-                <span class="smc-icon">💧</span>
-                <div><span class="smc-lbl">LIQUIDITY ZONES</span><p class="smc-val" id="res-liq">--</p></div>
-              </div>
-              <div class="smc-item">
-                <span class="smc-icon">🔄</span>
-                <div><span class="smc-lbl">PATTERN DETECTED</span><p class="smc-val yellow" id="res-pattern">--</p></div>
-              </div>
-            </div>
-
-            <p class="section-title">🧠 INSTITUTIONAL ANALYSIS</p>
-            <div class="analysis-box">
-              <p id="res-reason" class="analysis-text">...</p>
-            </div>
-
-            <p class="section-title">📋 HOW TO TRADE THIS SETUP</p>
-            <div class="how-box" id="res-how">Loading...</div>
-
-            <p class="section-title">⚖️ RISK MANAGEMENT</p>
-            <div class="risk-grid">
-              <div class="risk-cell">
-                <span class="risk-lbl">Best R:R Ratio</span>
-                <span class="risk-val green" id="res-rr">--</span>
-              </div>
-              <div class="risk-cell">
-                <span class="risk-lbl">Trade Quality</span>
-                <span class="risk-val" id="res-validity">--</span>
-              </div>
-              <div class="risk-cell risk-warn-cell">
-                <span class="risk-lbl">⚠ Risk Warning</span>
-                <p class="risk-val-sm" id="res-risk">--</p>
-              </div>
-            </div>
-
-            <div class="disclaimer-box">
-              ⚠️ <strong>DISCLAIMER:</strong> This analysis is AI-generated for
-              <strong>educational purposes only</strong> and is
-              <strong>NOT financial advice</strong>. Trading involves substantial risk of loss.
-              Past performance does not guarantee future results.
-              <strong>Manage your own risk.</strong> Tradinoxaior is not liable for any losses.
-              Always consult a licensed financial advisor before trading.
-            </div>
-
-          </div><!-- /result-card -->
-        </div>
-      </div>
-
-      <!-- SIDEBAR -->
-      <aside class="sidebar">
-        <div class="ad-banner ad-side">Sidebar Ad — 250×250</div>
-        <div class="card glass terminal-style">
-          <h3 class="widget-title">📡 Market News</h3>
-          <div id="news-container"><div class="loading-pulse">Connecting...</div></div>
-        </div>
-        <div class="card glass" style="margin-top:16px">
-          <h3 class="widget-title">🌐 Trading Sessions</h3>
-          <div id="sessions-container" class="sessions-wrap"></div>
-        </div>
-        <div class="card glass" style="margin-top:16px">
-          <h3 class="widget-title">💡 Pro Tips</h3>
-          <div class="tips-list">
-            <p>📌 Always place SL below Order Block</p>
-            <p>📌 Risk max 1-2% per trade</p>
-            <p>📌 Wait for candle close confirmation</p>
-            <p>📌 Follow the HTF (Higher Timeframe) bias</p>
-            <p>📌 Never enter without a clear SL level</p>
-          </div>
-        </div>
-      </aside>
-
-    </main>
+<!-- ══ TOPBAR ══════════════════════════════ -->
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <span class="logo-name">Tradinoxaior</span>
+    <span class="logo-badge">AI</span>
   </div>
+  <div class="topbar-right">
+    <div class="status-pill live" id="ai-pill">● AI Ready</div>
+    <span class="hello">Hello, <strong id="display-username">Trader</strong></span>
+    <button class="icon-btn" id="btn-settings">⚙</button>
+    <div id="settings-menu" class="drop-menu hidden">
+      <button id="btn-theme"  class="drop-item">🌙 Dark Mode</button>
+      <button id="btn-logout" class="drop-item danger">↩ Sign Out</button>
+    </div>
+  </div>
+</header>
 
-  <script type="module" src="dashboard.js"></script>
+<!-- ══ TICKER ══════════════════════════════ -->
+<div class="ticker-bar">
+  <div class="ticker-inner" id="top-ticker"></div>
+</div>
+
+<!-- ══ MAIN ════════════════════════════════ -->
+<div class="page-wrap">
+  <div class="pg-grid">
+
+    <!-- LEFT -->
+    <div class="main-col">
+
+      <!-- UPLOAD CARD -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">AI Chart Analyzer</h2>
+            <p class="card-desc">Upload any trading chart — our AI reads candlesticks, price levels, patterns and gives you a complete trade setup.</p>
+          </div>
+          <div class="engine-status" id="engine-status">
+            <span class="st-dot"></span> Online
+          </div>
+        </div>
+
+        <!-- Upload zone -->
+        <label class="upload-zone" id="upload-zone">
+          <div id="upload-hint">
+            <div class="upload-ico">📊</div>
+            <p class="upload-title">Drop your chart here</p>
+            <p class="upload-sub">PNG, JPG, WebP supported · Click or drag & drop</p>
+          </div>
+          <div class="preview-wrap hidden" id="preview-wrap">
+            <img id="preview-img" alt="Chart"/>
+            <div class="scan-overlay" id="scan-line" style="display:none"></div>
+          </div>
+          <input type="file" id="file-input" accept="image/*" style="display:none"/>
+        </label>
+
+        <button id="btn-analyze" class="btn-analyze hidden">
+          ⚡ Analyze Chart
+        </button>
+
+        <!-- Terminal -->
+        <div id="terminal" class="terminal hidden">
+          <div class="term-bar">
+            <span>Tradinoxaior AI Engine</span>
+            <div class="term-dots"><i></i><i></i><i></i></div>
+          </div>
+          <div id="term-body" class="term-body">
+            <p class="tlog">> Ready.</p>
+          </div>
+          <div class="prog-track"><div id="prog-bar" class="prog-fill"></div></div>
+        </div>
+
+        <!-- Error -->
+        <div id="err-box" class="err-box hidden">
+          <span class="err-icon">⚠</span>
+          <div>
+            <strong>Analysis Failed</strong>
+            <p id="err-msg">Please try again with a clear chart image.</p>
+          </div>
+        </div>
+
+        <!-- ══ RESULT ══════════════════════ -->
+        <div id="result" class="result hidden">
+
+          <!-- Signal header -->
+          <div class="sig-header">
+            <div class="sig-left">
+              <span id="r-signal" class="sig-badge">--</span>
+              <div>
+                <p class="sig-trend" id="r-trend">--</p>
+                <p class="sig-meta"><span id="r-asset">--</span> · <span id="r-tf">--</span> · <span id="r-market">--</span></p>
+              </div>
+            </div>
+            <div class="conf-wrap">
+              <span class="conf-label">Confidence</span>
+              <div class="conf-bar"><div id="conf-fill" class="conf-fill"></div></div>
+              <span id="r-conf" class="conf-num">--%</span>
+            </div>
+          </div>
+
+          <!-- Trade Setup -->
+          <div class="sec-head">🎯 Trade Setup</div>
+          <div class="trade-cards">
+            <div class="tc entry">
+              <span class="tc-lbl">Entry Zone</span>
+              <span class="tc-val" id="r-entry">--</span>
+              <span class="tc-note" id="r-entry-note">--</span>
+            </div>
+            <div class="tc sl">
+              <span class="tc-lbl">Stop Loss</span>
+              <span class="tc-val" id="r-sl">--</span>
+              <span class="tc-note" id="r-sl-note">--</span>
+            </div>
+            <div class="tc tp1">
+              <span class="tc-lbl">Target 1</span>
+              <span class="tc-val" id="r-tp1">--</span>
+              <span class="tc-note" id="r-rr1">R:R --</span>
+            </div>
+            <div class="tc tp2">
+              <span class="tc-lbl">Target 2</span>
+              <span class="tc-val" id="r-tp2">--</span>
+              <span class="tc-note" id="r-rr2">R:R --</span>
+            </div>
+          </div>
+
+          <!-- Key Levels -->
+          <div class="sec-head">📍 Key Levels</div>
+          <div class="levels-row">
+            <div class="lv support"><span>Support</span><strong id="r-support">--</strong></div>
+            <div class="lv current"><span>Price</span><strong id="r-price">--</strong></div>
+            <div class="lv resist"><span>Resistance</span><strong id="r-resist">--</strong></div>
+          </div>
+
+          <!-- SMC -->
+          <div class="sec-head">🏦 Smart Money Analysis</div>
+          <div class="smc-list">
+            <div class="smc-row">
+              <span class="smc-k">Order Blocks</span>
+              <span class="smc-v" id="r-ob">--</span>
+            </div>
+            <div class="smc-row">
+              <span class="smc-k">Fair Value Gap</span>
+              <span class="smc-v" id="r-fvg">--</span>
+            </div>
+            <div class="smc-row">
+              <span class="smc-k">Liquidity Zones</span>
+              <span class="smc-v" id="r-liq">--</span>
+            </div>
+            <div class="smc-row">
+              <span class="smc-k">Pattern Detected</span>
+              <span class="smc-v highlight" id="r-pattern">--</span>
+            </div>
+            <div class="smc-row">
+              <span class="smc-k">Strategy</span>
+              <span class="smc-v" id="r-strategy">--</span>
+            </div>
+          </div>
+
+          <!-- Analysis -->
+          <div class="sec-head">🧠 Analysis</div>
+          <div class="analysis-block" id="r-analysis">--</div>
+
+          <!-- How to Trade -->
+          <div class="sec-head">📋 How to Trade This Setup</div>
+          <div id="r-how" class="how-block"></div>
+
+          <!-- Risk -->
+          <div class="sec-head">⚖ Risk Management</div>
+          <div class="risk-row">
+            <div class="risk-item">
+              <span class="risk-lbl">Best R:R</span>
+              <span class="risk-val green" id="r-rr">--</span>
+            </div>
+            <div class="risk-item">
+              <span class="risk-lbl">Setup Quality</span>
+              <span class="risk-val" id="r-quality">--</span>
+            </div>
+          </div>
+          <div class="risk-warn" id="r-risk">--</div>
+
+          <!-- Disclaimer -->
+          <div class="disclaimer">
+            ⚠ <strong>DISCLAIMER:</strong> This AI analysis is for <strong>educational purposes only</strong>
+            and is <strong>NOT financial advice</strong>. Trading involves substantial risk of loss.
+            Past performance does not guarantee future results.
+            Always manage your own risk. Tradinoxaior is not liable for any losses.
+          </div>
+
+        </div><!-- /result -->
+      </div><!-- /card -->
+    </div><!-- /main-col -->
+
+    <!-- SIDEBAR -->
+    <aside class="side-col">
+      <div class="card">
+        <h3 class="widget-title">📡 Market News</h3>
+        <div id="news-feed"><p class="loading-txt">Loading...</p></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h3 class="widget-title">🌐 Sessions</h3>
+        <div id="sessions"></div>
+      </div>
+      <div class="card tips-card" style="margin-top:14px">
+        <h3 class="widget-title">💡 Pro Tips</h3>
+        <ul class="tips">
+          <li>Always place SL below the Order Block</li>
+          <li>Max risk 1–2% of capital per trade</li>
+          <li>Wait for candle close confirmation</li>
+          <li>Follow higher timeframe (HTF) bias first</li>
+          <li>Never enter without a clear SL level</li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<script type="module" src="dashboard.js"></script>
 </body>
-  </html>
-  
+              </html>
+            
