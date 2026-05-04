@@ -1,14 +1,21 @@
+// ══════════════════════════════════════════════
+//  Tradinoxaior — Auth Engine
+// ══════════════════════════════════════════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
   getAuth, setPersistence, browserLocalPersistence,
-  createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getFirestore, doc, setDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// ── FIREBASE CONFIG ──────────────────────────────────────────
-const firebaseConfig = {
+const FB = {
   apiKey:            "AIzaSyCX-lQnfA7mjt5P09TTw4Xn8hretwPPTrA",
   authDomain:        "earncrypto-26d59.firebaseapp.com",
   projectId:         "earncrypto-26d59",
@@ -17,87 +24,116 @@ const firebaseConfig = {
   appId:             "1:98622740161:web:83e7ec5ed8c4b4046c2640"
 };
 
-const app      = initializeApp(firebaseConfig);
-const auth     = getAuth(app);
-const db       = getFirestore(app);
-const provider = new GoogleAuthProvider();
+const app  = initializeApp(FB);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const gp   = new GoogleAuthProvider();
 
-setPersistence(auth, browserLocalPersistence);
+// Stay logged in
+setPersistence(auth, browserLocalPersistence).catch(()=>{});
 
-// ── REDIRECT ─────────────────────────────────────────────────
-const goToDashboard = () => {
-  const base = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
-  window.location.href = base + "/dashboard.html";
-};
+// ── If already logged in → go to dashboard ──
+onAuthStateChanged(auth, user => {
+  if (user) goDash();
+});
 
-onAuthStateChanged(auth, (user) => { if (user) goToDashboard(); });
-
-// ── HELPERS ──────────────────────────────────────────────────
-const getVal = (id) => document.getElementById(id)?.value?.trim() || '';
-const toast  = (msg, color) => typeof showToast === 'function' && showToast(msg, color);
-
-async function saveUser(user, username) {
-  const uname = username || user.displayName || user.email.split('@')[0];
-  await setDoc(doc(db, 'users', user.uid), {
-    uid: user.uid, email: user.email,
-    username: uname, createdAt: serverTimestamp(),
-    plan: 'free', analyses_today: 0
-  }, { merge: true });
+function goDash() {
+  const base = window.location.href.replace(/\/[^/]*$/, '');
+  window.location.href = base + '/dashboard.html';
 }
 
-// ── SIGN IN ──────────────────────────────────────────────────
+function toast(msg, type='') {
+  if (typeof showToast === 'function') showToast(msg, type);
+}
+
+function val(id) { return (document.getElementById(id)?.value || '').trim(); }
+
+async function saveProfile(user, username) {
+  try {
+    await setDoc(doc(db, 'users', user.uid), {
+      uid:        user.uid,
+      email:      user.email,
+      username:   username || user.displayName || user.email.split('@')[0],
+      plan:       'free',
+      createdAt:  serverTimestamp(),
+      analyses:   0
+    }, { merge: true });
+  } catch(e) { console.warn('Profile save:', e.message); }
+}
+
+function friendlyError(code) {
+  const map = {
+    'auth/invalid-credential':     'Incorrect email or password.',
+    'auth/user-not-found':         'No account found with this email.',
+    'auth/wrong-password':         'Incorrect password.',
+    'auth/email-already-in-use':   'This email is already registered. Sign in instead.',
+    'auth/weak-password':          'Password must be at least 6 characters.',
+    'auth/invalid-email':          'Please enter a valid email address.',
+    'auth/too-many-requests':      'Too many attempts. Please wait a moment.',
+    'auth/network-request-failed': 'Network error. Check your connection.',
+    'auth/popup-closed-by-user':   'Google sign-in was cancelled.',
+    'auth/cancelled-popup-request':'Google sign-in was cancelled.',
+  };
+  return map[code] || 'Something went wrong. Please try again.';
+}
+
+// ── SIGN IN ──────────────────────────────────
 document.getElementById('btn-signin')?.addEventListener('click', async () => {
-  const email = getVal('si-email');
-  const pass  = getVal('si-password');
-  if (!email || !pass) { toast('⚠ Please fill all fields', '#f59e0b'); return; }
+  const email = val('si-email'), pass = val('si-password');
+  if (!email || !pass) { toast('Please fill in all fields.', 'error'); return; }
+  const btn = document.getElementById('btn-signin');
+  btn.textContent = 'Signing in...'; btn.disabled = true;
   try {
-    toast('Signing in...', '#3b82f6');
     await signInWithEmailAndPassword(auth, email, pass);
-    goToDashboard();
-  } catch (e) {
-    const msg = e.code === 'auth/invalid-credential' ? 'Invalid email or password' : e.message;
-    toast('❌ ' + msg, '#ef4444');
+    toast('Welcome back! Loading dashboard...', 'ok');
+    setTimeout(goDash, 800);
+  } catch(e) {
+    toast(friendlyError(e.code), 'error');
+    btn.textContent = 'Sign In'; btn.disabled = false;
   }
 });
 
-// ── SIGN UP ──────────────────────────────────────────────────
+// ── REGISTER ─────────────────────────────────
 document.getElementById('btn-signup')?.addEventListener('click', async () => {
-  const username = getVal('su-username');
-  const email    = getVal('su-email');
-  const pass     = getVal('su-password');
-  if (!username || !email || !pass) { toast('⚠ All fields required', '#f59e0b'); return; }
-  if (pass.length < 6) { toast('⚠ Password min 6 characters', '#f59e0b'); return; }
+  const name  = val('su-name');
+  const email = val('su-email');
+  const pass  = val('su-password');
+  if (!name || !email || !pass) { toast('Please fill in all fields.', 'error'); return; }
+  if (pass.length < 6)          { toast('Password must be at least 6 characters.', 'error'); return; }
+  const btn = document.getElementById('btn-signup');
+  btn.textContent = 'Creating account...'; btn.disabled = true;
   try {
-    toast('Creating account...', '#3b82f6');
     const res = await createUserWithEmailAndPassword(auth, email, pass);
-    await saveUser(res.user, username);
-    goToDashboard();
-  } catch (e) {
-    const msg = e.code === 'auth/email-already-in-use' ? 'Email already registered' : e.message;
-    toast('❌ ' + msg, '#ef4444');
+    await saveProfile(res.user, name);
+    toast('Account created! Welcome to Tradinoxaior 🎉', 'ok');
+    setTimeout(goDash, 800);
+  } catch(e) {
+    toast(friendlyError(e.code), 'error');
+    btn.textContent = 'Create Account'; btn.disabled = false;
   }
 });
 
-// ── GOOGLE ───────────────────────────────────────────────────
+// ── GOOGLE ────────────────────────────────────
 document.getElementById('btn-google')?.addEventListener('click', async () => {
   try {
-    toast('Opening Google...', '#3b82f6');
-    const result = await signInWithPopup(auth, provider);
-    await saveUser(result.user, null);
-    goToDashboard();
-  } catch (e) {
-    toast('❌ Google Error: ' + e.message, '#ef4444');
+    const res = await signInWithPopup(auth, gp);
+    await saveProfile(res.user, null);
+    toast('Signed in with Google ✓', 'ok');
+    setTimeout(goDash, 600);
+  } catch(e) {
+    if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request')
+      toast(friendlyError(e.code), 'error');
   }
 });
 
-// ── FORGOT PASSWORD ──────────────────────────────────────────
+// ── FORGOT PASSWORD ───────────────────────────
 document.getElementById('btn-forgot')?.addEventListener('click', async () => {
-  const email = getVal('si-email');
-  if (!email) { toast('⚠ Enter your email first', '#f59e0b'); return; }
+  const email = val('si-email');
+  if (!email) { toast('Enter your email first, then click Forgot password.', 'error'); return; }
   try {
     await sendPasswordResetEmail(auth, email);
-    toast('✅ Reset email sent! Check inbox.', '#22c55e');
-  } catch (e) {
-    toast('❌ ' + e.message, '#ef4444');
+    toast('Password reset email sent! Check your inbox.', 'ok');
+  } catch(e) {
+    toast(friendlyError(e.code), 'error');
   }
 });
