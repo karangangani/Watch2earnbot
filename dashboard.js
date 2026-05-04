@@ -24,7 +24,7 @@ const db = getFirestore(fbApp);
 
 // ── AI CONFIG ────────────────────────────────────────
 // Paste your Gemini API key here for testing
-const _K  = "AIzaSyCX-lQnfA7mjt5P09TTw4Xn8hretwPPTrA";
+const _K  = "AIzaSyC8hjdJIJO-Nh2-sole2odN2sc6vHdO_MI";
 const _M  = "gemini-2.0-flash";
 const _EP = `https://generativelanguage.googleapis.com/v1beta/models/${_M}:generateContent?key=${_K}`;
 
